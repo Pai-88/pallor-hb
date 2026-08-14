@@ -1,0 +1,451 @@
+{
+  "dataset": {
+    "name": "CP-AnemiC (Mendeley m53vz6b7fx)",
+    "metadata_rows": 710,
+    "distinct_by_sha": 498,
+    "distinct_perceptual": 479,
+    "unambiguous_singles": 407,
+    "sites": 10,
+    "prevalence": 0.49269311064718163,
+    "who_threshold_g_dl": 11.0
+  },
+  "inference": {
+    "colour_vs_demographics": {
+      "auc_a": 0.7796610169491525,
+      "auc_b": 0.5646578782172003,
+      "difference": 0.2150031387319522,
+      "ci_lower": 0.15104367931850923,
+      "ci_upper": 0.27896259814539515,
+      "z": 6.5886446786643,
+      "p_value": 4.4385960205164117e-11,
+      "n": 479,
+      "n_positive": 236
+    },
+    "colour_vs_colour_plus_demographics": {
+      "auc_a": 0.7796610169491525,
+      "auc_b": 0.7685708307177233,
+      "difference": 0.011090186231429211,
+      "ci_lower": -0.009827457640390697,
+      "ci_upper": 0.03200783010324912,
+      "z": 1.0391593406408863,
+      "p_value": 0.29873063670079636,
+      "n": 479,
+      "n_positive": 236
+    },
+    "leakage_inflation_unpaired": {
+      "difference": 0.10293398239112994,
+      "ci_lower": 0.05595694238260455,
+      "ci_upper": 0.15158679755753515,
+      "p_value": 0.0,
+      "n_boot": 5000
+    },
+    "headline_ci_bootstrap": [
+      0.7365771782783308,
+      0.8180408489772831
+    ],
+    "headline_ci_delong": [
+      0.7383547378023427,
+      0.8209672960959622
+    ]
+  },
+  "controls": {
+    "permutation": {
+      "mean_auroc": 0.5065433842505406,
+      "std": 0.025544148958699327,
+      "runs": [
+        0.5015344911766757,
+        0.5439684034316803,
+        0.4999476878007951,
+        0.5255196345121016,
+        0.48771535188672654,
+        0.5409255771779312,
+        0.514202762084118,
+        0.4524307735230523,
+        0.5057456232126666,
+        0.49344353769965826
+      ]
+    },
+    "seed_stability": {
+      "mean": 0.7780062077143057,
+      "sd": 0.003413145012130112,
+      "min": 0.7733312408453652,
+      "max": 0.7833926204924322,
+      "n": 10,
+      "values": [
+        0.7796610169491525,
+        0.7771325939875846,
+        0.7800097649438515,
+        0.7785275859663806,
+        0.7784752737671757,
+        0.7733312408453652,
+        0.7744472344284019,
+        0.7815965683197323,
+        0.7734881774429796,
+        0.7833926204924322
+      ]
+    },
+    "singles_only": {
+      "split": "dedup_site",
+      "features": "colour",
+      "n": 407,
+      "n_folds": 5,
+      "auroc": 0.7632892804698972,
+      "auroc_lo": 0.7162687331128139,
+      "auroc_hi": 0.8101995365163559,
+      "mae": 1.4819270162340448,
+      "rmse": 1.906911694254873,
+      "bias": -0.038325114603322386,
+      "loa_lower": -3.7797162363893984,
+      "loa_upper": 3.7030660071827537,
+      "sensitivity": 0.7222222222222222,
+      "specificity": 0.7004405286343612,
+      "spec_at_90_sens": 0.4493392070484582,
+      "prevalence": 0.44226044226044225
+    },
+    "nested_cv": {
+      "auroc_fixed": 0.7796610169491525,
+      "auroc_nested_tuned": 0.7824510009067447,
+      "difference": 0.0027899839575922236,
+      "selected_params": [
+        {
+          "gbr__learning_rate": 0.02,
+          "gbr__max_depth": 4
+        },
+        {
+          "gbr__learning_rate": 0.02,
+          "gbr__max_depth": 4
+        },
+        {
+          "gbr__learning_rate": 0.02,
+          "gbr__max_depth": 4
+        },
+        {
+          "gbr__learning_rate": 0.02,
+          "gbr__max_depth": 4
+        },
+        {
+          "gbr__learning_rate": 0.02,
+          "gbr__max_depth": 4
+        }
+      ]
+    }
+  },
+  "model_comparison": [
+    {
+      "model": "Hb regressor",
+      "auroc": 0.7796610169491525,
+      "auroc_lo": 0.7365771782783308,
+      "auroc_hi": 0.8180408489772831,
+      "mae_g_dl": 1.462672475567911,
+      "loa_width_g_dl": 7.344912225199593,
+      "outputs_hb": true
+    },
+    {
+      "model": "binary classifier",
+      "auroc": 0.8179186719676361,
+      "auroc_lo": 0.7779090256697393,
+      "auroc_hi": 0.8541912040404139,
+      "mae_g_dl": NaN,
+      "loa_width_g_dl": NaN,
+      "outputs_hb": false
+    }
+  ],
+  "calibration_comparison": [
+    {
+      "variant": "uncalibrated",
+      "brier": 0.17403371585251126,
+      "ece": 0.053687265886927016,
+      "hosmer_lemeshow_p": 0.02143091596808186,
+      "auroc": 0.8179186719676361,
+      "prob_min": 0.007817557986135691,
+      "prob_max": 0.9824606427936695
+    },
+    {
+      "variant": "isotonic cv=3",
+      "brier": 0.20024419365699278,
+      "ece": 0.11626940010199971,
+      "hosmer_lemeshow_p": 4.3251795508406344e-05,
+      "auroc": 0.7884581851154355,
+      "prob_min": 0.0,
+      "prob_max": 0.9166666666666666
+    }
+  ],
+  "calibration": {
+    "brier": 0.17403371585251126,
+    "ece": 0.053687265886927016,
+    "hosmer_lemeshow": {
+      "chi2": 17.972855477898566,
+      "dof": 8,
+      "p_value": 0.02143091596808186,
+      "well_calibrated": false
+    }
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.5,
+      "n": 485,
+      "auroc": 0.7837635615413393
+    },
+    {
+      "threshold": 1.0,
+      "n": 483,
+      "auroc": 0.7777949245541838
+    },
+    {
+      "threshold": 2.0,
+      "n": 479,
+      "auroc": 0.7796610169491525
+    },
+    {
+      "threshold": 3.0,
+      "n": 479,
+      "auroc": 0.7796610169491525
+    },
+    {
+      "threshold": 4.0,
+      "n": 479,
+      "auroc": 0.7796610169491525
+    },
+    {
+      "threshold": 5.0,
+      "n": 476,
+      "auroc": 0.7737441511432859
+    }
+  ],
+  "headline": {
+    "split": "perceptual_site",
+    "features": "colour",
+    "n": 479,
+    "n_folds": 5,
+    "auroc": 0.7796610169491525,
+    "auroc_lo": 0.7365771782783308,
+    "auroc_hi": 0.8180408489772831,
+    "mae": 1.462672475567911,
+    "rmse": 1.871938413522634,
+    "bias": 0.0268928031912218,
+    "loa_lower": -3.645563309408575,
+    "loa_upper": 3.699348915791018,
+    "sensitivity": 0.7754237288135594,
+    "specificity": 0.6296296296296297,
+    "spec_at_90_sens": 0.36213991769547327,
+    "prevalence": 0.49269311064718163
+  },
+  "demographics_only": {
+    "split": "perceptual_site",
+    "features": "demographics",
+    "n": 479,
+    "n_folds": 5,
+    "auroc": 0.5646578782172003,
+    "auroc_lo": 0.513905454418637,
+    "auroc_hi": 0.6179668066769689,
+    "mae": 1.7293363757194609,
+    "rmse": 2.075357025600741,
+    "bias": -0.013446473556023072,
+    "loa_lower": -4.08531346779989,
+    "loa_upper": 4.058420520687844,
+    "sensitivity": 0.6694915254237288,
+    "specificity": 0.3950617283950617,
+    "spec_at_90_sens": 0.14814814814814814,
+    "prevalence": 0.49269311064718163
+  },
+  "naive_leaky": {
+    "split": "naive_random",
+    "features": "colour",
+    "n": 710,
+    "n_folds": 5,
+    "auroc": 0.8825949993402824,
+    "auroc_lo": 0.8582596911802735,
+    "auroc_hi": 0.9064743719321096,
+    "mae": 1.4573692620821161,
+    "rmse": 1.9263813842127349,
+    "bias": -0.08175660007655589,
+    "loa_lower": -3.856721547681654,
+    "loa_upper": 3.693208347528542,
+    "sensitivity": 0.9056603773584906,
+    "specificity": 0.5979020979020979,
+    "spec_at_90_sens": 0.618881118881119,
+    "prevalence": 0.5971830985915493
+  },
+  "leave_one_site_out": {
+    "per_site": [
+      {
+        "site": "Komfo Anokye Teaching Hospital",
+        "n_test": 94,
+        "auroc": 0.703020993343574,
+        "mae": 1.4373272572208295,
+        "prevalence": 0.32978723404255317,
+        "note": ""
+      },
+      {
+        "site": "Ahmadiyya Muslim Hospital",
+        "n_test": 87,
+        "auroc": 0.8120300751879699,
+        "mae": 1.409632703646383,
+        "prevalence": 0.4367816091954023,
+        "note": ""
+      },
+      {
+        "site": "Sunyani Municipal Hospital",
+        "n_test": 74,
+        "auroc": 0.7887426900584795,
+        "mae": 1.393831523442482,
+        "prevalence": 0.4864864864864865,
+        "note": ""
+      },
+      {
+        "site": "Bolgatanga Regional Hospital",
+        "n_test": 63,
+        "auroc": 0.7641129032258065,
+        "mae": 1.6682118504305252,
+        "prevalence": 0.5079365079365079,
+        "note": ""
+      },
+      {
+        "site": "Nkawie-Toase Government Hospital",
+        "n_test": 55,
+        "auroc": 0.8641456582633054,
+        "mae": 1.416822807463454,
+        "prevalence": 0.6181818181818182,
+        "note": ""
+      },
+      {
+        "site": "Kintampo Municipal Hospital",
+        "n_test": 40,
+        "auroc": 0.6879795396419437,
+        "mae": 1.6478641025624352,
+        "prevalence": 0.575,
+        "note": ""
+      },
+      {
+        "site": "Manhyia District Hospital",
+        "n_test": 28,
+        "auroc": 0.875,
+        "mae": 1.2679988688860142,
+        "prevalence": 0.5714285714285714,
+        "note": ""
+      },
+      {
+        "site": "Ejusu Government Hospital",
+        "n_test": 24,
+        "auroc": 0.8814814814814815,
+        "mae": 1.3248045927144096,
+        "prevalence": 0.625,
+        "note": ""
+      },
+      {
+        "site": "SDA Hospital",
+        "n_test": 11,
+        "auroc": 1.0,
+        "mae": 1.8731589869126593,
+        "prevalence": 0.8181818181818182,
+        "note": ""
+      },
+      {
+        "site": "Holy Family Hospital",
+        "n_test": 3,
+        "auroc": NaN,
+        "mae": NaN,
+        "prevalence": NaN,
+        "note": "too few samples"
+      }
+    ],
+    "mean_auroc": 0.8196125934669511,
+    "min_auroc": 0.6879795396419437,
+    "max_auroc": 1.0
+  },
+  "permutation_importance": [
+    {
+      "feature": "s_mean",
+      "importance": 0.07286381693873895,
+      "sd": 0.043001903651617934
+    },
+    {
+      "feature": "redness_p10",
+      "importance": 0.05460560100960338,
+      "sd": 0.03206330993987222
+    },
+    {
+      "feature": "h_mean",
+      "importance": 0.040231828867104316,
+      "sd": 0.02889898504329542
+    },
+    {
+      "feature": "redness_index",
+      "importance": 0.03920356837913736,
+      "sd": 0.026160091631855148
+    },
+    {
+      "feature": "r_mean",
+      "importance": 0.03401197225748051,
+      "sd": 0.023695274276025306
+    },
+    {
+      "feature": "lab_b",
+      "importance": 0.022397191174979857,
+      "sd": 0.026254482204043684
+    },
+    {
+      "feature": "b_mean",
+      "importance": 0.021228422699468053,
+      "sd": 0.01940709530033749
+    },
+    {
+      "feature": "lab_l",
+      "importance": 0.01848837839681047,
+      "sd": 0.019174712382974888
+    },
+    {
+      "feature": "lab_a",
+      "importance": 0.01834432106579888,
+      "sd": 0.015855418358363293
+    },
+    {
+      "feature": "h_concentration",
+      "importance": 0.016707855671856817,
+      "sd": 0.018364254313640513
+    },
+    {
+      "feature": "rg_ratio",
+      "importance": 0.012837197137282961,
+      "sd": 0.012672873307981959
+    },
+    {
+      "feature": "g_mean",
+      "importance": 0.006425907443295545,
+      "sd": 0.015000149720073394
+    }
+  ],
+  "learning_curve": [
+    {
+      "fraction": 0.25,
+      "mean": 0.6346864755527656,
+      "sd": 0.02627709974579793
+    },
+    {
+      "fraction": 0.4,
+      "mean": 0.671974611145986,
+      "sd": 0.026672267382525906
+    },
+    {
+      "fraction": 0.55,
+      "mean": 0.6984550463834832,
+      "sd": 0.015567794661664715
+    },
+    {
+      "fraction": 0.7,
+      "mean": 0.7383622794168933,
+      "sd": 0.01007306528727963
+    },
+    {
+      "fraction": 0.85,
+      "mean": 0.7616133082234777,
+      "sd": 0.01095750854103141
+    },
+    {
+      "fraction": 1.0,
+      "mean": 0.7821964148706144,
+      "sd": 0.0030409795273887374
+    }
+  ],
+  "runtime_seconds": 83.0
+}

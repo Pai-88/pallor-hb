@@ -1,0 +1,10 @@
+numpy>=1.26
+pandas>=2.0
+scikit-learn>=1.3
+scipy>=1.11
+matplotlib>=3.7
+# conjunctiva imaging modality (image loading for CP-AnemiC)
+pillow>=10.0
+scipy>=1.11
+# dev
+pytest>=7.0

@@ -1,0 +1,75 @@
+(footprint "LED_CT3030_660_850_4P"
+  (version 20241229)
+  (generator "kicad-mcp")
+  (generator_version "9.0")
+  (layer "F.Cu")
+  (descr "CT-3030SUR660+850C-PT dual-die 660nm + 850nm emitter, SMD3030-4P. Land pattern per Chongtian datasheet rev A1 2025-09-18: left column 1.78mm wide (2.35mm tall overall), right column 1.03mm wide (2.20mm tall overall), 0.4mm gaps. Package 3.2 x 3.0 x 0.63mm. PADS: 1=850 anode, 2=850 cathode, 3=660 anode, 4=660 cathode. NOTE the die offset: the 850 die sits in the upper half of the 3mm emitting circle and the 660 die in the lower half, roughly +/-0.75mm from package centre - orient so this offset is PERPENDICULAR to the source-detector axis.")
+  (tags "LED dual wavelength 660nm 850nm 3030 PPG emitter")
+
+  (property "Reference" "REF**" (at 0 -1.27 0)
+    (layer "F.SilkS")
+    (uuid "28f5d617-1517-4ac5-b580-bfbdc871d710")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (property "Value" "LED_CT3030_660_850_4P" (at 0 1.27 0)
+    (layer "F.Fab")
+    (uuid "896c3de2-0388-47d4-be13-e1cd51bcd2d5")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (property "Datasheet" "" (at 0 0 0)
+    (layer "F.Fab")
+    (uuid "fbed0d4a-5afc-43e5-b59f-e1ac0a6239ed")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+
+  (fp_rect
+    (start -1.85 -1.75)
+    (end 1.85 1.75)
+    (stroke (width 0.05) (type default))
+    (fill none)
+    (layer "F.CrtYd")
+    (uuid "0d2c16ff-d668-4dd8-a1be-1cf45c5f742d")
+  )
+
+  (fp_rect
+    (start -1.6 -1.5)
+    (end 1.6 1.5)
+    (stroke (width 0.1) (type default))
+    (fill none)
+    (layer "F.Fab")
+    (uuid "d0033591-6932-4dd4-8776-49efa76ed3af")
+  )
+
+  (pad "1" smd roundrect
+    (at -0.715 0.6875)
+    (size 1.78 0.975)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "f69b4a49-d31f-4436-a0e2-d23cfd0a3543")
+  )
+
+  (pad "2" smd roundrect
+    (at 1.09 0.65)
+    (size 1.03 0.9)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "d2c9cab4-5991-4a9c-be3c-966e3996e129")
+  )
+
+  (pad "3" smd roundrect
+    (at -0.715 -0.6875)
+    (size 1.78 0.975)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "dbd3ba6d-e4af-4635-ab42-dbdee58bc991")
+  )
+
+  (pad "4" smd roundrect
+    (at 1.09 -0.65)
+    (size 1.03 0.9)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "e723ab88-0a10-446d-8a7a-387e30621419")
+  )
+
+)

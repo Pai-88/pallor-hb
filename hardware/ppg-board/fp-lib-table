@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "pallorhb")(type "KiCad")(uri "/Users/paing/Documents/pallor-hb/hardware/ppg-board/lib/pallorhb.pretty")(options "")(descr "PallorHb custom footprints"))
+)

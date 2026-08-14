@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "pallorhb")(type "KiCad")(uri "/Users/paing/Documents/pallor-hb/hardware/ppg-board/lib/pallorhb.kicad_sym")(options "")(descr "PallorHb project-specific symbols"))
+  (lib (name "pallorhb_opto")(type "KiCad")(uri "/Users/paing/Documents/pallor-hb/hardware/ppg-board/lib/pallorhb_opto.kicad_sym")(options "")(descr "PallorHb optical symbols"))
+  (lib (name "pallorhb_emitters")(type "KiCad")(uri "/Users/paing/Documents/pallor-hb/hardware/ppg-board/lib/pallorhb_emitters.kicad_sym")(options "")(descr "PallorHb emitter symbols with datasheet-verified pinouts"))
+)

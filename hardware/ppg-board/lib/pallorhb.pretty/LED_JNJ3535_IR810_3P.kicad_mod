@@ -1,0 +1,67 @@
+(footprint "LED_JNJ3535_IR810_3P"
+  (version 20241229)
+  (generator "kicad-mcp")
+  (generator_version "9.0")
+  (layer "F.Cu")
+  (descr "JNJ-L-3535AW30-80530-SL-J2-D3, 810nm IR emitter, SMD3535-3P white ceramic. Land pattern per JNJ spec rev A/2 2024-04-06: three pads 3.3mm tall, widths 0.6 / 1.0 / 0.5mm. PADS: 1=CATHODE (left), 2=ANODE (right), 3=centre thermal, NC. Package 3.5 x 3.5mm, chip 30x30 mil, 30 deg beam, Vf 2.5-2.6V, 700mA max. WARNING: overall height is 4.09mm because of the silicone dome (emitting aperture 2.8mm dia) - this is 3.5mm TALLER than the CT3030 next to it and must be resolved in the clip design.")
+  (tags "LED IR 810nm isosbestic 3535 PPG emitter")
+
+  (property "Reference" "REF**" (at 0 -1.27 0)
+    (layer "F.SilkS")
+    (uuid "ddd2abd5-083e-48dd-ba42-6cc0820950be")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (property "Value" "LED_JNJ3535_IR810_3P" (at 0 1.27 0)
+    (layer "F.Fab")
+    (uuid "44399413-5012-4490-ad48-9df7bc125bd9")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (property "Datasheet" "" (at 0 0 0)
+    (layer "F.Fab")
+    (uuid "da534930-f82e-4562-a3b7-5755e9cf1a4a")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+
+  (fp_rect
+    (start -2 -1.95)
+    (end 2 1.95)
+    (stroke (width 0.05) (type default))
+    (fill none)
+    (layer "F.CrtYd")
+    (uuid "b1466bb7-34c8-434a-bb8e-017bf14d105d")
+  )
+
+  (fp_rect
+    (start -1.75 -1.75)
+    (end 1.75 1.75)
+    (stroke (width 0.1) (type default))
+    (fill none)
+    (layer "F.Fab")
+    (uuid "d5a63809-d209-405b-abfb-b7ccf397dfec")
+  )
+
+  (pad "1" smd roundrect
+    (at -1.3 0)
+    (size 0.6 3.3)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "54617868-63ac-4994-84bd-d97ad3ae409d")
+  )
+
+  (pad "3" smd roundrect
+    (at 0.1 0)
+    (size 1 3.3)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "dc94d86b-337e-4e07-b245-0de838cc6e2d")
+  )
+
+  (pad "2" smd roundrect
+    (at 1.35 0)
+    (size 0.5 3.3)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.1)
+    (uuid "1c13713e-4ebb-42f7-be85-6dbecb964559")
+  )
+
+)

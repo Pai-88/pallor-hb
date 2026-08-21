@@ -53,3 +53,11 @@ data/cp-anemic/
 *.kicad_prl
 *-backups/
 fp-info-cache
+
+# Paper — local working notes and build artefacts, not part of the record
+paper/DRAFTING.md
+paper/SUBMIT_METADATA.md
+paper/*.zip
+paper/**/*.aux
+paper/**/*.log
+paper/**/*.out

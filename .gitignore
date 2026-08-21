@@ -61,3 +61,4 @@ paper/*.zip
 paper/**/*.aux
 paper/**/*.log
 paper/**/*.out
+paper/CLAIMS_TO_VERIFY.md

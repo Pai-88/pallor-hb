@@ -62,3 +62,4 @@ paper/**/*.aux
 paper/**/*.log
 paper/**/*.out
 paper/CLAIMS_TO_VERIFY.md
+paper/MEETING_PREP.md

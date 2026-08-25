@@ -14,7 +14,8 @@ import json
 import pathlib
 import sys
 
-SUMMARY = pathlib.Path("results/cp_anemic_summary.json")
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+SUMMARY = REPO_ROOT / "results/cp_anemic_summary.json"
 
 # (label, value as printed in the paper, path into summary.json, tolerance)
 CLAIMS = [

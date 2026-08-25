@@ -63,3 +63,6 @@ paper/**/*.log
 paper/**/*.out
 paper/CLAIMS_TO_VERIFY.md
 paper/MEETING_PREP.md
+
+# Private meeting/glossary prep — never commit
+paper/GLOSSARY.md

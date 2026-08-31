@@ -18,7 +18,7 @@ flows into a pipeline that already tells the truth about performance.
 - **W2 — Real public dataset #1.** ✅ **Done, via the imaging modality rather than PPG.** Public
   PPG+Hb datasets with subject IDs proved hard to source; CP-AnemiC (conjunctiva images + lab Hb)
   was integrated instead, which needs no hardware. Includes a dataset-integrity audit that found
-  duplicate leakage worth +0.103 AUROC. *Delivered: `FINDINGS.md`, AUROC 0.780 [0.737–0.818].*
+  duplicate leakage worth +0.176 AUROC across three duplicate forms. *Delivered: `FINDINGS.md`, AUROC 0.706 [0.653–0.757].*
 - **W3 — Feature engineering + model comparison.** Waveform morphology features (systolic/diastolic
   ratios, area, red/IR ratio), compared classical (GBM / RF / linear) vs. a small 1-D CNN on raw
   windows. Honest cross-validation (subject-level splits, no leakage).

@@ -65,13 +65,16 @@ def main() -> int:
     banner("1 · DATA INTEGRITY")
     ds_naive = load_cp_anemic(args.root, dedup="none")
     ds_hash = load_cp_anemic(args.root, dedup="hash", verbose=False)
+    ds_thumb = load_cp_anemic(args.root, dedup="thumbnail", verbose=False)
     ds = load_cp_anemic(args.root, dedup="perceptual", verbose=False)
     ds_single = load_cp_anemic(args.root, dedup="singles", verbose=False)
     print(f"  rows {len(ds_naive)} → sha-distinct {len(ds_hash)} → "
-          f"pixel-distinct {len(ds)} → unambiguous singles {len(ds_single)}")
+          f"thumbnail-distinct {len(ds_thumb)} → aligned-distinct {len(ds)} → "
+          f"hash-level singles {len(ds_single)}")
     summary["dataset"] = {
         "name": "CP-AnemiC (Mendeley m53vz6b7fx)",
         "metadata_rows": len(ds_naive), "distinct_by_sha": len(ds_hash),
+        "distinct_thumbnail": len(ds_thumb),
         "distinct_perceptual": len(ds), "unambiguous_singles": len(ds_single),
         "sites": int(pd.Series(ds.groups).nunique()),
         "prevalence": float(ds.anemic.mean()),
@@ -81,10 +84,12 @@ def main() -> int:
     # -------------------------------------------------------------- matrix --
     banner("2 · EXPERIMENT MATRIX")
     configs = [("naive_random", ds_naive), ("dedup_random", ds_hash),
-               ("dedup_site", ds_hash), ("perceptual_site", ds)]
+               ("dedup_site", ds_hash), ("thumbnail_site", ds_thumb),
+               ("perceptual_site", ds)]
     results = []
     for split, d in configs:
-        strategy = "dedup_site" if split == "perceptual_site" else split
+        strategy = ("dedup_site" if split in {"thumbnail_site", "perceptual_site"}
+                    else split)
         for fs in FEATURE_SETS:
             r = run_one(d, split=strategy, features=fs)
             r.split = split
@@ -119,7 +124,7 @@ def main() -> int:
           f"[{d_colour_vs_both.ci_lower:+.3f},{d_colour_vs_both.ci_upper:+.3f}] "
           f"p={d_colour_vs_both.p_value:.3f}")
 
-    # Unpaired: different row sets (710 with duplicates vs 479 without).
+    # Unpaired: different row sets (710 with duplicates vs 383 without).
     leak = st.unpaired_auc_diff_ci(
         ds_naive.anemic, -oof_naive, ds.anemic, -oof,
         n_boot=1000 if args.quick else 5000)
@@ -218,6 +223,20 @@ def main() -> int:
         print(f"  threshold {t:>4.1f} → n={len(d):3d}  AUROC {a:.3f}")
     pd.DataFrame(sweep).to_csv(out / "cp_anemic_threshold_sweep.csv", index=False)
     summary["threshold_sweep"] = sweep
+
+    # Sensitivity to the pass-3 alignment threshold (distances are cached, so
+    # each point costs only the CV re-run).
+    a_thresholds = [2.0, 3.0, 4.0] if args.quick else [1.0, 2.0, 2.5, 3.0, 3.5, 4.0]
+    a_sweep = []
+    for t in a_thresholds:
+        d = load_cp_anemic(args.root, dedup="perceptual", verbose=False,
+                           aligned_threshold=t)
+        pr = out_of_fold_predictions(d, FEATURE_SETS[HEADLINE_FEATURES], HEADLINE_SPLIT)
+        a = _auroc(d.y, pr)
+        a_sweep.append({"threshold": t, "n": len(d), "auroc": float(a)})
+        print(f"  aligned thr {t:>4.1f} → n={len(d):3d}  AUROC {a:.3f}")
+    pd.DataFrame(a_sweep).to_csv(out / "cp_anemic_aligned_threshold_sweep.csv", index=False)
+    summary["aligned_threshold_sweep"] = a_sweep
 
     # ------------------------------------------------------------- figures --
     banner("8 · FIGURES")

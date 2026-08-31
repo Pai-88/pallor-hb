@@ -1,8 +1,9 @@
 """Dataset loading and synthetic data generation.
 
-Real data is integrated in Week 2 of the roadmap. Until then, `make_synthetic_ppg`
-produces a physiologically-motivated synthetic dataset so the whole pipeline
-(features -> model -> clinical evaluation) is runnable and testable from day one.
+`load_cp_anemic` loads the real CP-AnemiC conjunctiva dataset (the data behind the
+paper), including its duplicate handling; `make_synthetic_ppg` produces a
+physiologically-motivated synthetic PPG dataset used by the unit tests and the
+legacy CLI demo.
 
 No patient data is ever committed to this repo; see data/README.md.
 """
@@ -214,11 +215,25 @@ def _sha256(path: Path) -> str:
 
 
 # Mean-absolute pixel difference (0-255 scale) below which two ROI thumbnails are
-# treated as the same photograph. In CP-AnemiC the pair distribution is strongly
-# bimodal — 30 pairs below 5, then nothing until 192 pairs below 10 — so any
-# threshold in 3-5 separates re-encodings of one photo from genuinely distinct
-# images. 3.0 sits inside that gap.
+# treated as the same photograph. In CP-AnemiC the merged pairs all lie below
+# ~2.1 and the closest genuinely distinct pair sits at ~4.1, so any threshold in
+# that gap yields the same 479 groups; outside it the count drifts only slightly
+# (483 at 1.0, 476 at 5.0). 3.0 sits inside the gap.
 PERCEPTUAL_DUP_MAD = 3.0
+
+# Pass 3: shifted/re-cropped copies of one photograph defeat BOTH passes above —
+# different bytes (new hash) and a different hand-drawn mask (new bounding box,
+# so the bbox-normalised thumbnail mismatches). They are caught by aligning
+# full-resolution canvases under small integer translations and comparing RGB
+# inside the joint mask. Aligned mean-abs-diff: same-capture pairs sit below
+# ~2.7 (flat compression-noise residual); visually distinct repeat captures
+# start at ~3.1 (structured residual). 3.0 sits in that measured gap.
+ALIGNED_DUP_DIFF = 3.0
+_ALIGN_MAX_SHIFT = 30          # +/- px translation searched
+_ALIGN_MIN_OVERLAP = 0.60      # joint mask must cover >=60% of the smaller ROI
+_ALIGN_THUMB_CUTOFF = 20.0     # candidate prefilter A: generous thumbnail MAD
+_ALIGN_HIST_CUTOFF = 0.10      # candidate prefilter B: ROI colour-histogram L1
+_ALIGN_CACHE_NAME = "pass3_alignment_cache.json"
 
 
 def _roi_thumbnail(path: Path, size: int = 32) -> np.ndarray:
@@ -274,27 +289,159 @@ def _perceptual_groups(paths: list[Path], threshold: float = PERCEPTUAL_DUP_MAD)
     return [find(i) for i in range(n)]
 
 
+def _canvas_and_mask(path: Path) -> tuple[np.ndarray, np.ndarray]:
+    """Full-resolution RGB canvas and boolean conjunctiva mask."""
+    from PIL import Image
+
+    a = np.asarray(Image.open(path).convert("RGBA"), dtype=np.float32)
+    return a[..., :3], a[..., 3] >= 128
+
+
+def _aligned_best_diff(A: np.ndarray, ma: np.ndarray,
+                       B: np.ndarray, mb: np.ndarray,
+                       max_shift: int = _ALIGN_MAX_SHIFT) -> float:
+    """Smallest masked mean-abs RGB difference over integer translations.
+
+    Coarse stride-3 search over +/-max_shift, then a +/-2 refinement around the
+    best coarse shift. Only the joint mask is compared, and a candidate shift
+    counts only if that joint mask covers most of the smaller ROI — otherwise a
+    sliver of overlap could match by luck.
+    """
+    smaller_roi = min(ma.sum(), mb.sum())
+
+    def diff_at(dy: int, dx: int) -> float:
+        ay0, by0 = max(0, dy), max(0, -dy)
+        ax0, bx0 = max(0, dx), max(0, -dx)
+        h = min(A.shape[0] - ay0, B.shape[0] - by0)
+        w = min(A.shape[1] - ax0, B.shape[1] - bx0)
+        if h < 20 or w < 20:
+            return np.inf
+        mm = ma[ay0:ay0 + h, ax0:ax0 + w] & mb[by0:by0 + h, bx0:bx0 + w]
+        if mm.sum() < _ALIGN_MIN_OVERLAP * smaller_roi:
+            return np.inf
+        return float(np.abs(A[ay0:ay0 + h, ax0:ax0 + w][mm]
+                            - B[by0:by0 + h, bx0:bx0 + w][mm]).mean())
+
+    coarse = min((diff_at(dy, dx), dy, dx)
+                 for dy in range(-max_shift, max_shift + 1, 3)
+                 for dx in range(-max_shift, max_shift + 1, 3))
+    fine = min((diff_at(dy, dx), dy, dx)
+               for dy in range(coarse[1] - 2, coarse[1] + 3)
+               for dx in range(coarse[2] - 2, coarse[2] + 3))
+    return min(coarse[0], fine[0])
+
+
+def _alignment_pair_distances(paths: list[Path], shas: list[str],
+                              cache_dir: Path, verbose: bool = True) -> list[tuple[int, int, float]]:
+    """Aligned distances for every candidate pair among `paths`, disk-cached.
+
+    Candidates come from the union of two independent prefilters — a generous
+    thumbnail MAD and a translation-invariant ROI colour histogram — so pairs
+    whose masks differ (which defeats the thumbnail alone) are still examined.
+    The verified distances are cached next to the data, keyed by the content
+    hashes and the search parameters, so re-loads and threshold sweeps are free.
+    """
+    import hashlib as _hl
+    import json
+
+    key = _hl.md5(("|".join(sorted(shas))
+                   + f"|{_ALIGN_MAX_SHIFT}|{_ALIGN_MIN_OVERLAP}"
+                   + f"|{_ALIGN_THUMB_CUTOFF}|{_ALIGN_HIST_CUTOFF}").encode()).hexdigest()
+    cache_path = cache_dir / _ALIGN_CACHE_NAME
+    if cache_path.exists():
+        try:
+            blob = json.loads(cache_path.read_text())
+            if blob.get("key") == key:
+                sha_to_idx = {s: i for i, s in enumerate(shas)}
+                return [(sha_to_idx[a], sha_to_idx[b], d)
+                        for a, b, d in blob["pairs"]
+                        if a in sha_to_idx and b in sha_to_idx]
+        except (json.JSONDecodeError, KeyError):
+            pass  # stale or corrupt cache: recompute below
+
+    n = len(paths)
+    thumbs = np.stack([_roi_thumbnail(p) for p in paths])
+    canv, masks, hists = [], [], []
+    for p in paths:
+        rgb, m = _canvas_and_mask(p)
+        canv.append(rgb)
+        masks.append(m)
+        h = np.concatenate([np.histogram(rgb[..., c][m], bins=32,
+                                         range=(0, 256))[0] for c in range(3)]).astype(float)
+        hists.append(h / h.sum())
+    hists = np.stack(hists)
+
+    cands: list[tuple[int, int]] = []
+    for i in range(n - 1):
+        tm = np.abs(thumbs[i + 1:] - thumbs[i]).mean(axis=1)
+        hd = np.abs(hists[i + 1:] - hists[i]).sum(axis=1)
+        cands += [(i, i + 1 + int(off))
+                  for off in np.where((tm < _ALIGN_THUMB_CUTOFF)
+                                      | (hd < _ALIGN_HIST_CUTOFF))[0]]
+    if verbose:
+        print(f"  alignment pass: verifying {len(cands)} candidate pairs "
+              f"(one-off; cached afterwards)")
+    pairs = [(i, j, _aligned_best_diff(canv[i], masks[i], canv[j], masks[j]))
+             for i, j in cands]
+
+    cache_path.write_text(json.dumps(
+        {"key": key, "pairs": [[shas[i], shas[j], round(d, 4)]
+                               for i, j, d in pairs if np.isfinite(d)]}))
+    return [(i, j, d) for i, j, d in pairs if np.isfinite(d)]
+
+
+def _alignment_groups(paths: list[Path], shas: list[str], cache_dir: Path,
+                      threshold: float = ALIGNED_DUP_DIFF,
+                      verbose: bool = True) -> list[int]:
+    """Group ids merging shifted/re-cropped copies of one photograph."""
+    parent = list(range(len(paths)))
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def union(i: int, j: int) -> None:
+        ri, rj = find(i), find(j)
+        if ri != rj:
+            parent[max(ri, rj)] = min(ri, rj)
+
+    for i, j, d in _alignment_pair_distances(paths, shas, cache_dir, verbose=verbose):
+        if d < threshold:
+            union(i, j)
+    return [find(i) for i in range(len(paths))]
+
+
 def load_cp_anemic(
     root: str | Path,
     dedup: str = "hash",
     label_agg: str = "median",
     verbose: bool = True,
     perceptual_threshold: float = PERCEPTUAL_DUP_MAD,
+    aligned_threshold: float = ALIGNED_DUP_DIFF,
 ) -> Dataset:
     """Load the CP-AnemiC conjunctiva dataset into the standard Dataset schema.
 
-    CP-AnemiC ships 710 metadata rows but only ~498 distinct images: 91 groups of
-    byte-identical files appear under different IMAGE_IDs, and 90 of those groups
-    carry *different* Hb values on identical pixels (one group spans 3.3–10.4
-    g/dL). Any random train/test split therefore places the same image on both
-    sides, so accuracy measured that way is substantially memorisation.
+    CP-AnemiC ships 710 metadata rows but only 383 distinct photographs
+    (498 byte-distinct files; 479 after merging re-encoded copies; 383 after
+    merging shifted/re-cropped copies). 116 final-grain groups carry
+    *different* Hb values on the same photograph (90 at the hash grain; one
+    group spans 3.3–10.4 g/dL), and 125 groups are attributed to more than one
+    hospital. Any random split therefore places the same photograph on both
+    sides — and cross-site copies defeat site-grouped splits too — so accuracy
+    measured naively is substantially memorisation.
 
     This loader makes that explicit rather than hiding it:
 
     - ``dedup="none"``    keep all 710 rows (reproduces the optimistic, leaky setup)
-    - ``dedup="hash"``    one row per distinct image, Hb aggregated by `label_agg`
-    - ``dedup="singles"`` keep only images that appear exactly once — labels
-      unambiguous, at the cost of sample size
+    - ``dedup="hash"``    one row per byte-distinct image, Hb aggregated by `label_agg`
+    - ``dedup="thumbnail"`` additionally merge re-encoded copies below
+      ``PERCEPTUAL_DUP_MAD`` (n=479)
+    - ``dedup="perceptual"`` additionally merge shifted/re-cropped copies of one
+      photograph below ``ALIGNED_DUP_DIFF`` — the headline setting (n=383)
+    - ``dedup="singles"`` keep only images whose byte hash appears exactly once;
+      note a handful of re-encoded and shifted copies survive at this grain
 
     Groups are the collection **site** (hospital), so `GroupKFold` additionally
     tests generalisation across cameras, operators and populations. Deduplication
@@ -302,7 +449,7 @@ def load_cp_anemic(
 
     Args:
         root: folder containing the unzipped CP-AnemiC images + metadata file.
-        dedup: "none" | "hash" | "singles" (see above).
+        dedup: "none" | "hash" | "thumbnail" | "perceptual" | "singles" (see above).
         label_agg: how to reconcile conflicting Hb within a duplicate group
             when ``dedup="hash"`` — "median" (robust) or "first".
         verbose: print a short data-integrity summary.
@@ -316,9 +463,10 @@ def load_cp_anemic(
     # Validate arguments before touching the filesystem: hashing several hundred
     # images and only then rejecting a misspelled mode wastes a minute and buries
     # the real error under an unrelated one.
-    if dedup not in {"none", "hash", "perceptual", "singles"}:
+    if dedup not in {"none", "hash", "thumbnail", "perceptual", "singles"}:
         raise ValueError(
-            f"dedup must be 'none', 'hash', 'perceptual' or 'singles'; got {dedup!r}"
+            f"dedup must be 'none', 'hash', 'thumbnail', 'perceptual' or 'singles'; "
+            f"got {dedup!r}"
         )
     if label_agg not in {"median", "first"}:
         raise ValueError(f"label_agg must be 'median' or 'first'; got {label_agg!r}")
@@ -396,9 +544,9 @@ def load_cp_anemic(
         agg_hb = grp.hb.median() if label_agg == "median" else grp.hb.first()
         keep = rec.drop_duplicates("sha").copy()
         keep["hb"] = keep.sha.map(agg_hb)
-    elif dedup == "perceptual":
-        # Collapse exact duplicates first (cheap), then merge re-encoded copies
-        # that are pixel-identical after ROI extraction (more expensive).
+    elif dedup in {"thumbnail", "perceptual"}:
+        # Pass 2: collapse exact duplicates first (cheap), then merge re-encoded
+        # copies whose ROI thumbnails match (moderate cost).
         agg_hb = grp.hb.median() if label_agg == "median" else grp.hb.first()
         keep = rec.drop_duplicates("sha").copy()
         keep["hb"] = keep.sha.map(agg_hb)
@@ -410,8 +558,23 @@ def load_cp_anemic(
         keep = keep.drop_duplicates("pgroup").copy()
         keep["hb"] = keep.pgroup.map(agg_p)
         if verbose and merged:
-            print(f"  perceptual pass: merged {merged} groups of re-encoded copies "
+            print(f"  thumbnail pass: merged {merged} groups of re-encoded copies "
                   f"that byte-hashing missed")
+        if dedup == "perceptual":
+            # Pass 3: merge shifted/re-cropped copies of one photograph, which
+            # carry both a new hash AND a new mask (so passes 1-2 miss them).
+            keep = keep.reset_index(drop=True)
+            keep["agroup"] = _alignment_groups(
+                list(keep.path), list(keep.sha), cache_dir=meta_path.parent,
+                threshold=aligned_threshold, verbose=verbose)
+            ag = keep.groupby("agroup")
+            merged_a = int((ag.size() > 1).sum())
+            agg_a = ag.hb.median() if label_agg == "median" else ag.hb.first()
+            keep = keep.drop_duplicates("agroup").copy()
+            keep["hb"] = keep.agroup.map(agg_a)
+            if verbose and merged_a:
+                print(f"  alignment pass: merged {merged_a} groups of shifted/"
+                      f"re-cropped copies that both earlier passes missed")
     else:  # pragma: no cover - unreachable; dedup is validated on entry
         raise AssertionError(dedup)
     keep = keep.reset_index(drop=True)

@@ -11,7 +11,7 @@ This module therefore provides:
 - **DeLong's test** for two correlated ROC curves (same subjects, two scores),
   which is the standard exact-variance method and needs no resampling.
 - **An unpaired bootstrap** for the leakage comparison, where the two AUROCs come
-  from genuinely different row sets (710 rows with duplicates vs 479 without) and
+  from genuinely different row sets (710 rows with duplicates vs 383 distinct photographs) and
   so cannot be paired.
 - **Calibration** measures, because a screening tool that outputs a probability
   must be judged on whether that probability is truthful, not only on ranking.

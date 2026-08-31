@@ -44,7 +44,7 @@ def _cv_mae(ds, seed: int, n_splits: int = 5) -> float:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Train + evaluate the PallorHb Hb estimator.")
     ap.add_argument("--modality", choices=["ppg"], default="ppg",
-                    help="feature modality (only synthetic PPG is wired up in this scaffold)")
+                    help="feature modality (this CLI drives the synthetic-PPG demo; the CP-AnemiC conjunctiva analysis runs via scripts/run_full_analysis.py)")
     ap.add_argument("--n", type=int, default=2000, help="synthetic sample count")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--population", choices=list(WHO_ANEMIA_CUTOFFS), default="women_nonpreg",

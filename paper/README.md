@@ -27,10 +27,10 @@ tectonic main.tex
       mean 0.820; permutation null 0.507 ± 0.026; seed stability sd 0.003;
       Bland–Altman LoA span 7.34 → quoted as 7.3 g/dL.
 - [x] **Corresponding-author email in the title block** — `zcemphh@ucl.ac.uk`.
-- [ ] **Complete the Acknowledgements** — the section is restored and a
-      *Use of generative AI* declaration has been added. You still need to name
-      anyone who helped (supervisors, endorsers, draft readers), and delete the
-      ACTION REQUIRED comment.
+- [x] **Acknowledgements resolved** — the empty section was removed
+      (commit e196b55); the *Use of generative AI* declaration remains. Add a
+      named Acknowledgements section only once the people to thank have agreed
+      to be named.
 - [ ] **Read the manuscript end to end before posting.** The draft was written
       with AI assistance from your results; the declaration says you have
       verified every line, so verify every line.

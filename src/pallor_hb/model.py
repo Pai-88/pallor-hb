@@ -59,21 +59,20 @@ class AnemiaClassifier:
     screening tool that reports "72% likely anaemic" must have that number mean
     what it says, which is what this class provides.
 
-    **Calibration defaults to OFF, contrary to the usual advice.** Measured on
-    CP-AnemiC (see `experiment.calibration_comparison`), wrapping this model in
-    `CalibratedClassifierCV` made both calibration *and* discrimination worse:
+    **Calibration defaults to OFF.** Measured on the fully deduplicated
+    CP-AnemiC set (n=383; see `experiment.calibration_comparison`), isotonic
+    wrapping now improves calibration but costs discrimination:
 
         variant              Brier    ECE   AUROC   probability range
-        uncalibrated         0.174  0.054   0.818   [0.01, 0.98]
-        isotonic  cv=3       0.200  0.116   0.788   [0.00, 0.92]
-        sigmoid   cv=3       0.213  0.169   0.789   [0.20, 0.71]
+        uncalibrated         0.220  0.114   0.733   [0.01, 0.98]
+        isotonic  cv=3       0.220  0.079   0.711   [0.10, 0.84]
 
-    The mechanism is visible in that last column. `CalibratedClassifierCV` fits k
-    sub-models on k-1 folds each and averages their outputs; averaging pulls
-    probabilities toward the centre, and with only ~380 training rows each
-    sub-model is data-starved as well. The result is systematic *under*
-    -confidence — the opposite of the over-confidence calibration is meant to
-    cure. Pass `calibrate=True` to reproduce that comparison.
+    The default stays uncalibrated because this model is used as a *ranking*
+    triage screen — discrimination is the operative property — and neither
+    variant produces probabilities reliable enough for clinical reporting
+    (documented as a limitation). With ~300 training rows per fold the
+    `CalibratedClassifierCV` sub-models are also data-starved. Pass
+    `calibrate=True` to reproduce the comparison.
     """
 
     def __init__(self, random_state: int = 0, calibrate: bool = False):

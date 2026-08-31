@@ -482,7 +482,7 @@ def test_headline_auroc_is_reproducible_and_in_range():
     ds = load_cp_anemic(_CP_ROOT, dedup="perceptual", verbose=False)
     oof = ex.out_of_fold_predictions(ds, ex.FEATURE_SETS["colour"], "dedup_site")
     auroc = ex._auroc(ds.y, oof)
-    assert 0.74 < auroc < 0.82, f"headline AUROC moved: {auroc:.4f}"
+    assert 0.66 < auroc < 0.76, f"headline AUROC moved: {auroc:.4f}"
 
 
 @requires_cp

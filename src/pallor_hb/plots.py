@@ -10,7 +10,7 @@ spacing and axis treatment are identical across them. Two deliberate choices:
 - **Encoded twice, always.** Series differ in both colour *and* line style or
   marker, so the figures survive greyscale printing and photocopying.
 
-Uncertainty is drawn wherever it exists. A bare point estimate at n = 479 invites
+Uncertainty is drawn wherever it exists. A bare point estimate at n = 383 invites
 over-reading; a band or an error bar makes the sampling noise part of the message
 rather than a footnote.
 """

@@ -96,12 +96,12 @@ def build(root: str, out: Path, width_px: int = 2400, height_px: int = 640) -> N
             transform=ax.transAxes, color=INK, fontsize=11.5, alpha=0.93,
             va="center", family="sans-serif", zorder=5)
     ax.text(0.030, 0.660,
-            f"Every stripe below is one of {n} children — that child's real conjunctiva "
+            f"Every stripe below is one of {n} distinct photographs — its real conjunctiva "
             f"colour, ordered by their real blood test",
             transform=ax.transAxes, color=MUTED, fontsize=8.8, va="center",
             family="sans-serif", zorder=5)
     # The banner would be dishonest without this line. Sorted by haemoglobin the
-    # field shows no clean pale-to-red gradient (r = +0.02 for mean redness),
+    # field shows no clean pale-to-red gradient (r ~ 0 for mean redness),
     # and a reader is entitled to know that is the truth rather than assume the
     # picture failed. The absence of an obvious gradient IS the finding.
     ax.text(0.030, 0.570,
@@ -110,10 +110,10 @@ def build(root: str, out: Path, width_px: int = 2400, height_px: int = 640) -> N
             transform=ax.transAxes, color=ACCENT, fontsize=8.8, alpha=0.92,
             va="center", family="sans-serif", zorder=5)
 
-    ax.text(0.970, 0.885, "AUROC 0.780", transform=ax.transAxes, color=ACCENT,
+    ax.text(0.970, 0.885, "AUROC 0.706", transform=ax.transAxes, color=ACCENT,
             fontsize=20, fontweight="bold", ha="right", va="center",
             family="sans-serif", zorder=5)
-    ax.text(0.970, 0.755, "95% CI 0.737–0.818 · deduplicated, hospital-grouped",
+    ax.text(0.970, 0.755, "95% CI 0.653–0.757 · deduplicated, hospital-grouped",
             transform=ax.transAxes, color=MUTED, fontsize=8.6, ha="right",
             va="center", family="sans-serif", zorder=5)
     ax.text(0.970, 0.660, "triage, not measurement",

@@ -1,7 +1,16 @@
+> **UPDATE (31 Aug 2026).** A third dedup pass (translation alignment of full-resolution
+> canvases) found 96 further *shifted/re-cropped* copies that both hashing and thumbnail
+> comparison miss. The distinct-photograph count is **383**, not 479, and the honest headline
+> AUROC is **0.706 [0.653–0.757]** (total leakage inflation +0.176 vs the naive split). 125
+> duplicate groups span more than one hospital, which defeats site-grouped CV as well as random
+> splits. Numbers below this banner predate the third pass and are being revised; the current
+> analysis output is `results/cp_anemic_summary.json` and the detector is
+> `scripts/pass3_shift_dedup.py`.
+
 # Conjunctival pallor screening on CP-AnemiC: duplicate leakage and an honest baseline
 
 **Status:** software-only study on public data. No hardware, no patient recruitment, no clinical claims.
-All numbers below are produced by `python3 scripts/run_full_analysis.py` in ~80 s on a laptop.
+The current `python3 scripts/run_full_analysis.py` run (~9 min with the alignment pass, cached thereafter) produces the corrected numbers in the banner above; prose and figures below are being revised to match.
 
 ---
 
@@ -12,7 +21,7 @@ Using the public CP-AnemiC dataset (710 conjunctiva photographs of Ghanaian chil
 
 **1 · The benchmark contains duplicate leakage large enough to change conclusions.**
 Of 710 metadata rows only **479 are distinct photographs**. 212 files are byte-identical copies
-registered under different image IDs; a further 19 are pixel-identical after region-of-interest
+registered under different image IDs; a further 19 are re-encoded copies (13 exactly pixel-identical, 6 near-identical) after region-of-interest
 extraction but differ at the byte level, so content hashing alone does not find them. Ninety
 duplicate groups carry **conflicting haemoglobin on identical pixels** — one group spans
 3.3 to 10.4 g/dL. Evaluating with a random split trains and tests on the same photograph and
@@ -193,7 +202,7 @@ Every check below is designed to make the headline number *fail* if it is an art
 | **Label permutation** (10 repeats) | AUROC 0.507 ± 0.026 | Chance. The harness does not leak. |
 | **Seed stability** (10 seeds) | 0.778 ± 0.003 (0.773–0.783) | The result is not fold-assignment luck. |
 | **Bootstrap vs DeLong CI** | [0.737, 0.818] vs [0.738, 0.821] | Independent machinery, same interval. |
-| **Unambiguous singles only** (n = 407) | 0.763 | Consistent where no label conflict is possible. |
+| **Byte-hash singles only** (n = 407) | 0.763 | Robustness check at the hash grain; a handful of re-encoded and shifted copies survive this filter, so it is not conflict-free. |
 | **Nested-CV hyperparameter tuning** | 0.780 → 0.782 (Δ +0.003) | Fixed settings were not cherry-picked. |
 | **Duplicate-threshold sweep** (0.5–5.0) | 0.774–0.784 | The conclusion does not hinge on the cutoff. |
 

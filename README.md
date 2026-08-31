@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="results/banner.png" width="100%" alt="PallorHb — 479 vertical stripes, each one child's real conjunctiva colour, ordered by their laboratory haemoglobin">
+  <img src="results/banner.png" width="100%" alt="PallorHb — one vertical stripe per distinct child, filled with their real conjunctiva colour, ordered by laboratory haemoglobin">
 </p>
 
 <p align="center">
-  <em>The banner is not decoration.</em> Every stripe is one child in the dataset, filled with that
-  child's true conjunctiva colour and ordered by their laboratory haemoglobin — regenerate it with
+  <em>The banner is not decoration.</em> Every stripe is one distinct photograph in the dataset,
+  filled with its true conjunctiva colour and ordered by laboratory haemoglobin — regenerate it with
   <code>python3 scripts/make_banner.py</code>. It is built from derived colour statistics only; no
   dataset photograph is redistributed here.
 </p>
@@ -30,26 +30,31 @@ just a single accuracy number).
 On the public **CP-AnemiC** dataset (Ghanaian children 6–59 months, paired laboratory Hb), twelve
 interpretable colour features detect WHO anaemia (Hb < 11 g/dL) with:
 
-**AUROC 0.780 (95 % CI 0.737–0.818)** — pixel-deduplicated images, cross-validated grouped by hospital.
+**AUROC 0.706 (95 % CI 0.653–0.757)** — fully deduplicated images (three passes, n=383), cross-validated grouped by hospital.
 
 Three findings matter more than that number:
 
 1. **CP-AnemiC has duplicate leakage large enough to change conclusions.** 710 metadata rows
-   resolve to only **479 distinct photographs**; 90 duplicate groups carry *conflicting* Hb on
-   pixel-identical images (one spans 3.3–10.4 g/dL). The usual random split inflates AUROC by
-   **+0.103** (95 % CI +0.056 to +0.152, p < 0.001).
-2. **The camera earns its place.** Demographics-only floor is 0.565; the image adds
-   **+0.215 AUROC** (DeLong p = 4.4 × 10⁻¹¹).
+   resolve to only **383 distinct photographs** across three duplicate forms — byte-identical
+   files, re-encoded copies, and shifted/re-cropped copies of one photograph saved under different
+   IDs (often attributed to different hospitals). 116 final-grain groups carry *conflicting* Hb on
+   the same photograph (one spans 3.3–10.4 g/dL), and 125 groups span more than one site — which
+   defeats even site-grouped CV. The naive random split inflates AUROC by
+   **+0.176** (95 % CI +0.120 to +0.232, p < 0.001).
+2. **The camera earns its place.** Demographics-only floor is 0.524; the image adds
+   **+0.182 AUROC** (DeLong p = 2 × 10⁻⁶).
 3. **It is a triage screen, not a haemoglobin meter.** Bland–Altman limits of agreement span
-   **7.3 g/dL** with proportional-bias slope −0.67 — ranking works, absolute Hb does not.
+   **7.8 g/dL** — ranking works, absolute Hb does not.
 
 <p align="center">
   <img src="results/fig2_leakage.png" width="620" alt="AUROC falls as each source of leakage is removed">
 </p>
 
-Controls designed to make the result fail: label permutation **0.507 ± 0.026** (chance);
-10-seed stability **0.778 ± 0.003**; bootstrap and DeLong CIs agree to 0.003; nested-CV tuning
-changes nothing (+0.003); the conclusion is flat across duplicate-merging thresholds 0.5–5.0.
+Controls designed to make the result fail: label permutation **0.529 ± 0.032** (chance);
+10-seed stability **0.702 ± 0.006**; nested-CV hyperparameter tuning does not help (−0.044 —
+honest evidence the fixed settings were not cherry-picked). Sensitivity: the result is flat across
+thumbnail thresholds 0.5–5.0, and varies 0.685–0.728 across alignment thresholds 1.0–4.0 (reported,
+not hidden).
 
 **→ Full method, tables, controls, figures and limitations: [FINDINGS.md](FINDINGS.md)**
 
@@ -164,11 +169,12 @@ published licence and cited in [FINDINGS.md](FINDINGS.md#data-citation). I did n
 dataset images or patient data are committed to this repository; the loader reads a local copy that
 each user downloads themselves.
 
-**What this repository contributes.** The dataset-integrity audit (duplicate detection at both byte
-and pixel level, and the finding that 90 duplicate groups carry conflicting haemoglobin labels), the
+**What this repository contributes.** The dataset-integrity audit (duplicate detection at byte, pixel and shifted-copy
+level, and the finding that 116 final-grain duplicate groups carry conflicting haemoglobin labels), the
 leakage quantification, the mask-aware feature extraction, the evaluation design, and the controls.
-The reported AUROC is not a state-of-the-art claim — several published models score higher on this
-dataset, and part of my argument is that those numbers are inflated by the leakage documented here.
+The reported AUROC is not a state-of-the-art claim — it is what remains after the duplicate
+structure and site grouping documented here are accounted for, which is why it sits below
+previously published figures on this dataset.
 
 **Prior work.** The published CP-AnemiC benchmark and subsequent papers using it are cited in
 FINDINGS.md. Where my numbers disagree with theirs, the disagreement is attributed to evaluation

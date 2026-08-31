@@ -4,8 +4,8 @@ The point of this module is not to squeeze out the highest number — it is to
 measure how much of a reported number is real. Three things are varied
 independently and reported side by side:
 
-1. **Split strategy.** CP-AnemiC contains 212 redundant image files (710 rows,
-   498 distinct images), so a random split trains and tests on the same pixels.
+1. **Split strategy.** CP-AnemiC contains 327 redundant rows (710 rows,
+   383 distinct photographs), so a random split trains and tests on the same pixels.
    Comparing `naive_random` against `dedup_site` quantifies that inflation
    directly rather than asserting it.
 2. **Feature set.** Age and sex alone predict childhood anemia reasonably well.

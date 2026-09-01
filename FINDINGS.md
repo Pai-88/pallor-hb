@@ -1,7 +1,7 @@
 # Conjunctival pallor screening on CP-AnemiC: duplicate leakage and an honest baseline
 
 **Status:** software-only study on public data. No hardware, no patient recruitment, no clinical claims.
-The current `python3 scripts/run_full_analysis.py` run (~9 min with the alignment pass, cached thereafter) produces the corrected numbers in the banner above; prose and figures below are being revised to match.
+`python3 scripts/run_full_analysis.py` (~9 min on first run; the alignment pass is cached thereafter) regenerates every number and figure below.
 
 ---
 
@@ -11,11 +11,11 @@ Using the public CP-AnemiC dataset (710 conjunctiva photographs of Ghanaian chil
 6–59 months with paired laboratory haemoglobin), this study reports three things.
 
 **1 · The benchmark contains duplicate leakage large enough to change conclusions.**
-Of 710 metadata rows only **383 are distinct photographs**, in three forms that each defeat the
-detection method sufficient for the last. 212 files are byte-identical copies registered under
+Only **383 of 710 metadata rows are distinct photographs**. The duplication takes three forms,
+each of which defeats the detection method that sufficed for the previous one. 212 files are byte-identical copies registered under
 different image IDs. A further 19 are re-encoded copies (13 exactly pixel-identical after
 region-of-interest extraction, 6 near-identical) whose bytes differ, so content hashing misses
-them. The largest and least visible group is **96 shifted or re-cropped copies**: their bytes
+them. The largest and least visible form comprises **96 shifted or re-cropped copies**: their bytes
 differ *and* their hand-drawn masks differ, so bounding-box pixel comparison misses them too.
 **116 groups carry conflicting haemoglobin on the same photograph** — one spans 3.3 to
 10.4 g/dL — and **125 groups are attributed to more than one hospital**, which defeats
@@ -72,7 +72,7 @@ Two deliberate exclusions:
 - **Hue is averaged circularly.** Red tissue sits near both 0.0 and 1.0 on the hue circle, so a
   linear mean of 0.98 and 0.02 returns 0.5 — cyan.
 
-A gradient-boosted regressor predicts haemoglobin; its output negated doubles as the screening
+A gradient-boosted regressor predicts haemoglobin; the negated output serves as the screening
 score. Hyperparameters were **fixed a priori and never tuned on this data**. All reported metrics
 are out-of-fold.
 
@@ -108,8 +108,7 @@ The image adds real signal; demographics add nothing detectable on top of it.
 
 ### Model choice
 
-Both models are reported because they answer different questions and the better one was not
-quietly adopted after the fact.
+Both models are reported because they answer different questions.
 
 | Model | AUROC [95 % CI] | Hb output | Agreement assessable |
 |---|---|---|---|
@@ -133,9 +132,7 @@ but is clearly miscalibrated (H–L p < 0.001, ECE 0.114); isotonic repairs the 
 mechanism is visible in the last column: `CalibratedClassifierCV` fits k sub-models on k−1 folds
 each and averages them, which pulls probabilities toward the centre, and at ~300 training rows per
 fold each sub-model is data-starved. The uncalibrated model is the headline because this is a
-ranking triage screen — but its output should not be read as a probability of anaemia. On the
-incompletely deduplicated data this section previously reported the opposite conclusion, which is
-a reminder that model-selection findings inherit the evaluation set's contamination.
+ranking triage screen — but its output should not be read as a probability of anaemia.
 
 ![Calibration](results/fig4_calibration.png)
 
@@ -260,7 +257,7 @@ learning curve, threshold sweep, model and calibration comparisons, a machine-re
 
 The test suite is organised by failure mode rather than by module — split integrity, feature
 correctness, numerical robustness, determinism, statistical machinery, and adversarial nulls —
-because the dangerous failure here is not a crash but a plausible wrong number.
+because in this setting a plausible wrong number is more dangerous than a crash.
 
 ## Data citation
 

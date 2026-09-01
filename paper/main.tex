@@ -41,11 +41,11 @@ University College London, London, United Kingdom}
 Conjunctival pallor photographs are an attractive substrate for non-invasive anaemia
 screening, and CP-AnemiC --- 710 images of Ghanaian children aged 6--59 months with paired
 laboratory haemoglobin --- has become a convenient public benchmark for the task. We report
-that the benchmark contains duplicate records substantial enough to change published
+that the benchmark contains duplication substantial enough to change published
 conclusions, and we provide a corrected baseline.
 
-Of the 710 metadata rows only 383 are distinct photographs, in three forms that each defeat the
-detection method sufficient for the last: 212 byte-identical copies; 19 re-encoded copies whose
+Only 383 of the 710 metadata rows are distinct photographs. The duplication takes three forms,
+each of which defeats the detection method that sufficed for the previous one: 212 byte-identical copies; 19 re-encoded copies whose
 bytes, and so whose hashes, differ; and 96 \emph{shifted or re-cropped} copies whose hand-drawn
 masks differ as well, so that neither hashing nor bounding-box pixel comparison detects them.
 116 groups carry \emph{conflicting} haemoglobin labels on the same photograph, one spanning 3.3
@@ -61,9 +61,9 @@ features reach \auroc{} $0.706$ (95\,\% CI $0.653$--$0.757$) for WHO anaemia
 ($\mathrm{Hb}<11$~\gdl), against a demographics-only floor of $0.524$; the image contributes
 $+0.182$ \auroc{} (DeLong 95\,\% CI $+0.107$ to $+0.258$, $p=2.1\times10^{-6}$). Bland--Altman
 limits of agreement span $7.8$~\gdl{} with strong proportional bias (slope $-0.81$), so the model
-is a triage screen and not a haemoglobin meter. At 90\,\% sensitivity specificity falls to
+is a triage screen and not a haemoglobin meter. At 90\,\% sensitivity, specificity falls to
 $0.303$, and decision curve analysis places the model below referring every child up to a threshold
-probability of about $0.26$ --- so it earns its place only where confirmatory testing is scarce.
+probability of about $0.26$ --- it is useful only where confirmatory testing is scarce.
 
 We recommend that future work on CP-AnemiC deduplicate under small translations, not merely by file
 hash or aligned pixel comparison, and we release the detector and full analysis so that reported
@@ -109,8 +109,8 @@ This paper makes three contributions.
         estimator.
 \end{enumerate}
 
-Our aim is deliberately not a new architecture. It is to establish what the honest number
-on this benchmark is, and to make the controls that produce it reproducible.
+We propose no new architecture; the aim is to establish what this benchmark supports under
+stated controls, and to make those controls reproducible.
 
 \section{Data}
 
@@ -240,7 +240,7 @@ All merges use union--find, so a chain of copies collapses to one photograph.
 
 \paragraph{Cross-validation.} Folds are grouped by collection site, so that a model cannot exploit
 site-specific camera, lighting or operator signatures shared between training and test folds. We
-report a waterfall over both requirements. We stress that neither requirement alone is
+report a waterfall over both requirements. Neither requirement alone is
 sufficient here. After hashing and the re-encode merge, 74 photographs still appear as multiple
 rows attributed to different hospitals, so site-grouping cannot contain them; and because those
 rows differ in bytes and in mask, hashing and bounding-box comparison do not remove them either.
@@ -282,7 +282,7 @@ $+0.232$; the interval excludes zero). That interval and the DeLong intervals in
 Table~\ref{tab:ablation} are computed on overlapping data and are not independent tests.
 Figure~\ref{fig:leakage} shows the waterfall.
 
-The final step is worth isolating. Removing shifted and re-cropped copies costs a further
+The final step merits separate attention. Removing shifted and re-cropped copies costs a further
 $0.073$ \auroc{}. That step does two things at once, however --- it removes leakage \emph{and} it
 removes 96 rows --- so the drop must be decomposed before it is credited to leakage. Subsampling
 the 479-photograph set down to 383 rows at random, leaving its leakage intact, gives
@@ -291,8 +291,7 @@ smaller sample ($0.036$) and roughly half to the leakage the pass removes ($0.03
 both, because a step that deletes data will always depress a learning-curve-limited estimate, and
 attributing the whole of it to leakage would overstate the case.
 
-An analysis that hashed files and grouped by site --- the protocol we ourselves reported at an
-earlier stage of this work --- would stop at $0.780$ and appear rigorous.
+An analysis that hashed files and grouped folds by site would stop at $0.780$.
 
 \begin{figure}[htbp]
 \centering
@@ -399,8 +398,8 @@ so averaging pulls estimates toward the centre.
 
 We report the uncalibrated model as the headline because the instrument is a ranking triage
 screen, for which discrimination is the operative property, and we make the trade explicit rather
-than choosing the flattering column. The honest statement is that this model can order children
-by risk but should not have its output read as a probability of anaemia. We note in passing that
+than choosing the flattering column. This model can order children by risk, but its output should not be read as a probability of
+anaemia. We note that
 this section previously reported the opposite conclusion --- that calibration degraded both
 properties --- on the incompletely deduplicated data; the reversal is a reminder that
 model-selection findings inherit whatever contamination the evaluation set carries.
@@ -581,7 +580,7 @@ This does not change the headline --- $0.706$ is what the model achieves on data
 distinct, which is the number a deployment would face --- but it does bound how much of the fall
 is attributable to contamination.
 
-The \emph{alignment threshold sweep} is the honest weak point. Between thresholds $1.0$ and $4.0$
+The \emph{alignment threshold sweep} is the least stable control. Between thresholds $1.0$ and $4.0$
 the retained count falls from 397 to 376 while \auroc{} varies non-monotonically between $0.685$
 and $0.728$: roughly $\pm0.02$ around the headline. The gap between merged and distinct pairs is real but narrower
 than at pass 2, so we report the range rather than a single number, and we chose the threshold by
@@ -636,27 +635,26 @@ larger, cleanly labelled dataset would plausibly exceed $0.706$.
 
 \section{Discussion}
 
-The gap between $0.883$ and $0.706$ is not a modelling result; it is an artefact of dataset
-handling. It matters because it is the kind of gap that separates a method reported as promising
+The gap between $0.883$ and $0.706$ is an artefact of dataset handling rather than a modelling
+result. It matters because it is the kind of gap that separates a method reported as promising
 from one reported as marginal, and because nothing about the naive protocol looks careless from
 the inside --- a random split is the default, and duplicates are invisible unless specifically
 sought.
 
-The awkwardness deepens with each form of duplication. The 19 re-encoded copies already defeat a
+Each form of duplication defeats the remedy for the previous one. The 19 re-encoded copies defeat a
 practitioner who deduplicates by file hash. The 96 shifted copies defeat the obvious repair: they
 survive pixel comparison too, because the hand-drawn mask moves with them, and 74 of the
 photographs they conceal are attributed to more than one hospital, so they survive site-grouped
 folds as well.
 Two independent safeguards, each individually sound, leave the leak in place.
 
-Half of the last step's cost is sample size rather than contamination, and we say so; the
-honest summary is that the corrected number is lower both because the data are cleaner and because
-there are fewer of them, and that a benchmark of 383 photographs is small for the task.
+Half of the last step's cost is sample size rather than contamination; the
+corrected number is lower both because the data are cleaner and because there are fewer of them,
+and a benchmark of 383 photographs is small for the task.
 
-We report this from experience rather than from principle. An earlier version of this analysis
-applied passes 1 and 2, grouped by site, and reported $0.780$ as the honest number; it was
-subjected to adversarial review and to a published set of controls, and the residual leak was
-found only when we searched specifically for copies whose masks disagreed. The general lesson we
+An earlier version of this analysis applied passes 1 and 2, grouped folds by site, and reported
+$0.780$ as the corrected figure; the residual leak was found only when we searched specifically for
+copies whose masks disagreed. The general lesson we
 draw is that dataset audits should be reported as a specific list of what was tested for, since
 ``deduplicated'' names a procedure rather than a property, and each procedure has a blind spot
 that the next one exposes. We make no claim that a fourth form is absent from CP-AnemiC; we claim
@@ -667,7 +665,7 @@ features, not a ceiling for the task. Learned representations may well exceed it
 purpose of reporting it is that any such claim can now be measured against a number produced
 under controls that are stated and reproducible.
 
-The clinical framing deserves emphasis. Discrimination at \auroc{} $0.706$ remains of some
+Clinically, discrimination at \auroc{} $0.706$ remains of some
 interest for triage where the alternative is no screening at all, but the margin has narrowed.
 The Bland--Altman result forecloses use as a haemoglobin estimator; the operating point ---
 70\,\% of healthy children referred at 90\,\% sensitivity --- would impose a confirmatory
@@ -723,8 +721,7 @@ needed to judge whether such a method could be deployed.
 \section*{Reproducibility}
 
 The complete analysis runs in approximately nine minutes on a laptop --- dominated by the
-alignment pass, whose pairwise distances are cached thereafter, after which re-runs take about
-90~seconds:
+alignment pass; its pairwise distances are cached, and subsequent runs take about 90~seconds:
 
 \begin{quote}\ttfamily\small
 pip install -r requirements.txt\\

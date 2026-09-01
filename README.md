@@ -13,15 +13,13 @@
 
 # PallorHb — Non-Invasive Point-of-Care Anemia Screening
 
-**Estimating blood hemoglobin (Hb) without a needle**, from a low-cost photoplethysmography (PPG)
-front-end and/or a smartphone image of the palpebral conjunctiva — and flagging anemia against WHO
-thresholds. Built as an end-to-end ML + embedded-hardware system: sensor → signal/feature extraction
-→ calibrated regression model → clinical decision, with an honest validation story (error bars, not
-just a single accuracy number).
+**Estimating blood hemoglobin (Hb) without a needle** from a smartphone image of the palpebral
+conjunctiva — and flagging anemia against WHO thresholds. An end-to-end ML study: image → colour
+features → calibrated regression model → clinical decision, with an honest validation story
+(error bars, not just a single accuracy number).
 
-> **Status:** the conjunctiva imaging modality now runs on **real public data** (CP-AnemiC, 710
-> images with paired lab Hb). The PPG modality remains synthetic-only pending hardware.
-> See the [12-week roadmap](ROADMAP.md).
+> **Status:** the conjunctiva imaging modality runs on **real public data** (CP-AnemiC, 710
+> images with paired lab Hb). A synthetic-PPG demo pipeline is retained for the unit tests.
 
 ---
 
@@ -97,12 +95,12 @@ Success is measured against a **reference Hb** (lab CBC or HemoCue) using:
 
 Two complementary, cheap modalities:
 
-1. **PPG (primary).** A reflectance PPG sensor (e.g. MAX30102, red + IR) on a fingertip. Hb and blood
-   volume change the absorption of red/IR light; waveform morphology and the red/IR ratio carry
-   information about Hb. This reuses analog-front-end skills from my [EMG project](https://github.com/).
-2. **Conjunctiva pallor (secondary).** A colour-calibrated image of the lower-eyelid conjunctiva;
-   pallor (reduced redness) correlates with low Hb. Handled as a colour-feature regression with a
-   reference colour card for white balance.
+1. **Conjunctiva pallor (this study).** An image of the lower-eyelid conjunctiva; pallor
+   (reduced redness) correlates with low Hb. Handled as a colour-feature regression over the
+   annotated region of interest.
+2. **PPG (possible future modality).** A reflectance sensor on a fingertip; waveform morphology
+   carries Hb-related signal. Only a synthetic demo pipeline exists here
+   (`python -m pallor_hb.train`), kept because the unit tests exercise it.
 
 Pipeline: `capture → preprocess/QC → feature extraction → regression (calibrated) → Hb estimate + anemia flag + uncertainty`.
 
@@ -126,7 +124,6 @@ evaluation are wired together and unit-tested from day one.
 ```
 pallor-hb/
 ├── README.md
-├── ROADMAP.md              # 12-week milestone plan
 ├── requirements.txt
 ├── src/pallor_hb/
 │   ├── dataset.py          # loaders + synthetic data generator
@@ -140,7 +137,6 @@ pallor-hb/
 ├── scripts/
 │   ├── run_full_analysis.py  # single entry point for the CP-AnemiC study
 │   └── make_banner.py        # README banner, generated from the data
-├── hardware/               # PPG front-end board (rev A) + capture notes
 ├── data/                   # dataset pointers (no PHI committed)
 ├── results/                # figures + metric tables (regenerated)
 └── tests/                  # 62 tests, organised by failure mode

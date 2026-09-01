@@ -7,7 +7,7 @@ medRxiv on 2026-08-22 — re-check if more than a month has passed.
 
 ## Still yours to do — two items
 
-- [ ] **Read the manuscript end to end.** Not optional and not delegable. The *Use of generative AI*
+- [ ] **Read the manuscript end to end.** Delete the fragment. The next sentence already carries the point: "The *Use of generative AI* section states, in your name, that you have reviewed and verified the entire manuscript." The *Use of generative AI*
       section states, in your name, that you have reviewed and verified the entire manuscript.
       That sentence is already public on GitHub. Roughly two hours for 14 pages. Every number has
       been checked against `../results/cp_anemic_summary.json` (see the verified list in
@@ -34,7 +34,7 @@ Everything else below is done.
 
 Endorsement is the thing that stalls first-time arXiv submissions, and chasing one costs days you
 do not have before 7 September. medRxiv has no such gate and is a defensible home for a
-non-invasive screening paper. You can cross-post to arXiv later; nothing is lost.
+non-invasive screening paper. medRxiv permits later submission of the same preprint to arXiv.
 
 If you do go to arXiv: **eess.IV** primary, cross-list **cs.CV** and **cs.LG**. Ask a UCL
 supervisor with an arXiv history for the endorsement — this is also a legitimate, low-cost reason
@@ -61,8 +61,7 @@ University College London, London, United Kingdom. Corresponding: `zcemphh@ucl.a
 **Suggested keywords** — anaemia screening; conjunctival pallor; dataset integrity; data leakage;
 benchmark evaluation; medical imaging; low-resource settings
 
-**ORCID** — worth registering before you submit if you have not. It is free, takes five minutes,
-and it links this preprint to everything you publish afterwards.
+**ORCID** — register at orcid.org before submitting if you do not already have an iD; both venues accept one.
 
 ---
 
@@ -78,8 +77,7 @@ that should be reported", and which holds that an author who signs takes "full r
 all its contents, irrespective of how the contents were generated." arXiv is also explicit that
 generative AI "should not be listed as an author" — it is not.
 
-**Do not remove that section.** It has gone missing from this file once already, and it was absent
-from the arXiv bundle until 2026-08-22.
+Both venues require this declaration. Confirm it is present in `main.tex` and `arxiv/main.tex` before uploading (see the grep check below).
 
 ---
 
@@ -97,8 +95,7 @@ Do **not** upload `main.pdf` alongside the source; both venues build it themselv
 
 ### Keeping the bundle in sync — run this after ANY edit to `main.tex`
 
-`arxiv/main.tex` is generated, not hand-maintained. It silently fell 30 lines behind once, which
-is how the AI declaration nearly went unposted.
+`arxiv/main.tex` is generated from `main.tex`; do not edit it directly. Regenerate it after every change to `main.tex`, or the bundle ships an out-of-date manuscript.
 
 ```bash
 cd ~/Documents/pallor-hb/paper

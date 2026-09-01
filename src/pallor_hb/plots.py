@@ -3,16 +3,12 @@
 Every figure in the study is drawn through this module so that type, colour,
 spacing and axis treatment are identical across them. Two deliberate choices:
 
-- **Okabe-Ito palette.** Chosen for colourblind safety rather than aesthetics.
-  Roughly 1 in 12 men has a red-green deficiency, and a clinical-screening figure
-  whose "anemic" and "healthy" series are indistinguishable to part of its
-  audience has failed at its only job.
-- **Encoded twice, always.** Series differ in both colour *and* line style or
+- **Okabe-Ito palette.** Colourblind-safe; ~8 % of men have a red-green
+  deficiency, and the anaemic/healthy series must stay distinguishable for them.
+- **Redundant encoding.** Series differ in both colour *and* line style or
   marker, so the figures survive greyscale printing and photocopying.
 
-Uncertainty is drawn wherever it exists. A bare point estimate at n = 383 invites
-over-reading; a band or an error bar makes the sampling noise part of the message
-rather than a footnote.
+Every point estimate is plotted with a bootstrap band or error bar; at n = 383 the sampling noise is large enough to change how a curve reads.
 """
 
 from __future__ import annotations
@@ -113,8 +109,8 @@ def roc_figure(curves: dict, path: str, cutoff: float, band_for: str | None = No
 
     `curves` maps label -> (reference Hb, predicted Hb). Each entry carries its
     own reference array because the leaky configuration is scored on a different
-    (un-deduplicated) row set, and showing them on one axis is what makes the
-    size of the leakage visible instead of merely asserted.
+    (un-deduplicated) row set; the curves are drawn on one axis to show the size of
+    the leakage directly.
     """
     from sklearn.metrics import roc_curve
 
@@ -183,8 +179,7 @@ def leakage_waterfall(rows: list[dict], path: str) -> None:
 def site_forest(loso, path: str, pooled: float | None = None) -> None:
     """Forest plot of leave-one-site-out AUROC, marker area scales with test-set size.
 
-    Sizing by n is what stops a 0.875 on ten patients from reading as
-    the strongest site on the chart.
+    Marker area encodes test-set size so a high AUROC from a ten-patient site is not read as the strongest result.
     """
     plt = _style()
     d = loso.dropna(subset=["auroc"]).sort_values("n_test")
@@ -305,8 +300,7 @@ def bland_altman_figure(y_true, y_pred, path: str) -> None:
     plt.close(fig)
 
 
-# Human-readable axis labels. Raw identifiers are fine in code and wrong in a
-# figure a reader meets without the source beside them.
+# Human-readable axis labels. # Human-readable axis labels; figures are read without the source alongside.
 FEATURE_LABELS = {
     "r_mean": "Red (mean)",
     "g_mean": "Green (mean)",

@@ -46,7 +46,7 @@ CONJ_QC_COLUMNS = ["roi_px"]
 
 # Demographics-only feature set. Age and sex alone predict childhood anemia
 # reasonably well, so any image model must be shown to beat this — otherwise the
-# "image" result is really a demographics result wearing a camera.
+# reasonably well, so any image model must be shown to beat this baseline.
 DEMOGRAPHIC_COLUMNS = ["age", "is_female"]
 
 
@@ -432,7 +432,7 @@ def load_cp_anemic(
     sides — and cross-site copies defeat site-grouped splits too — so accuracy
     measured naively is substantially memorisation.
 
-    This loader makes that explicit rather than hiding it:
+    The `dedup` argument selects how these duplicates are handled:
 
     - ``dedup="none"``    keep all 710 rows (reproduces the optimistic, leaky setup)
     - ``dedup="hash"``    one row per byte-distinct image, Hb aggregated by `label_agg`

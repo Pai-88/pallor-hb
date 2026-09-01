@@ -29,9 +29,7 @@ HEADLINE_SPLIT = "dedup_site"
 def operating_point_figure(y_true, score, path):
     """Sensitivity and specificity against every achievable decision threshold.
 
-    The paper argues that AUROC is not the number that decides deployability.
-    This is that argument as a picture: it shows what a screening programme
-    actually has to trade, and marks the two operating points quoted in the
+    Plots sensitivity and specificity against every achievable decision threshold,, and marks the two operating points quoted in the
     text — the WHO cutoff, and the threshold tuned to 90 % sensitivity.
     """
     plt = plots._style()
@@ -128,10 +126,8 @@ def pred_vs_actual_figure(y_true, y_pred, path):
 def decision_curve_figure(y_true, prob, path):
     """Net benefit against threshold probability (Vickers & Elkin, 2006).
 
-    AUROC says how well the model ranks; it says nothing about whether acting
-    on it beats the obvious alternatives. In a setting where the realistic
-    comparators are "refer every child" and "refer none", that is the question
-    that decides deployment.
+    Compares the model against the two clinical defaults, referring every child and
+    referring none.
 
         NB(p_t) = TP/N - (FP/N) * p_t/(1 - p_t)
 
@@ -197,9 +193,7 @@ def feature_correlation_figure(X, names, path):
     """Pairwise correlation between the twelve colour features.
 
     The importance section argues that a low permutation score means "redundant
-    given the others" rather than "uninformative". That argument only holds if
-    the features really are collinear, which is an evidential claim and is
-    therefore shown rather than asserted.
+    given the others" rather than "uninformative". This figure shows the correlation structure that claim depends on.
     """
     plt = plots._style()
     C = np.corrcoef(np.asarray(X, dtype=float).T)
@@ -281,9 +275,9 @@ if __name__ == "__main__":
 def shifted_duplicate_figure(root, out_path):
     """fig13: a shifted/re-cropped duplicate pair, and their aligned residual.
 
-    The pass-3 finding is hard to believe in the abstract: two files, two masks,
-    two hospitals, two haemoglobin values, one photograph. Showing the pair and
-    the residual after alignment is the most direct evidence available.
+    Panels: the two source images, and the per-pixel absolute residual inside the
+    joint mask after the best integer shift. The pair carries two filenames, two
+    site labels and two Hb values.
     """
     import numpy as np
     from PIL import Image

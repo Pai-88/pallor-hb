@@ -1,8 +1,8 @@
 """Regression model for hemoglobin estimation.
 
 A thin wrapper around a scikit-learn pipeline (standardization + gradient boosting).
-Kept small on purpose: the interesting engineering is in the features and the
-clinical evaluation, and a strong tabular baseline should be beaten before reaching
+Kept small on purpose: feature extraction and clinical evaluation live in
+`features.py` and `evaluate.py`, and a strong tabular baseline should be beaten before reaching
 for a deep model (roadmap W3 compares against a 1-D CNN on raw windows).
 """
 
@@ -55,9 +55,8 @@ class AnemiaClassifier:
     """Predict P(anaemic) directly, with probability calibration.
 
     The regressor above ranks well enough to compute an AUROC, but its raw output
-    is a haemoglobin value in g/dL and cannot be read as a probability. A
-    screening tool that reports "72% likely anaemic" must have that number mean
-    what it says, which is what this class provides.
+    is a haemoglobin value in g/dL and cannot be read as a probability. This class outputs a probability in [0, 1] instead of a haemoglobin value,
+    optionally isotonic-calibrated.
 
     **Calibration defaults to OFF.** Measured on the fully deduplicated
     CP-AnemiC set (n=383; see `experiment.calibration_comparison`), isotonic

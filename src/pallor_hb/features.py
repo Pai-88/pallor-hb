@@ -111,7 +111,7 @@ def load_conjunctiva_roi(source) -> np.ndarray:
     Only masked-in tissue pixels are returned; the caller sees a flat pixel list
     with no spatial layout, which is all the colour statistics need.
 
-    Ignoring the mask is not a small error: averaging the full frame mixes in
+    Averaging the full frame mixes in ~75 % black pixels and shifts mean RGB by >100/255, so the resulting "colour" feature largely encodes the masked fraction.
     ~75 % black pixels and shifts mean RGB by >100/255, so the resulting
     "colour" feature mostly encodes how much of the frame was masked.
     """
@@ -170,8 +170,8 @@ def conjunctiva_color_features(
     ang = 2.0 * np.pi * hsv[:, 0]
     h_mean = float((np.arctan2(np.sin(ang).mean(), np.cos(ang).mean()) / (2.0 * np.pi)) % 1.0)
     # Hue concentration in [0, 1]: 1 = all pixels one hue, 0 = uniformly spread.
-    # A blanched conjunctiva is less consistently red, so this is informative in
-    # a way the circular mean alone is not.
+    # A blanched conjunctiva is less consistently red, so hue spread carries
+    # signal that the circular mean does not.
     h_concentration = float(np.hypot(np.sin(ang).mean(), np.cos(ang).mean()))
     s_mean = float(hsv[:, 1].mean())
     # NOTE: HSV "value" is max(R,G,B), which for red tissue is always the red

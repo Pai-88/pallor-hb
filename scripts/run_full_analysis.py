@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Complete CP-AnemiC analysis: experiment matrix, inference, controls, figures.
 
-The single entry point for the study. Produces everything needed to defend the
-result rather than merely state it:
+The single entry point for the study. Runs:
 
   * DeLong tests for the model comparisons (correlated AUROCs, same subjects)
   * an unpaired bootstrap for the leakage comparison (different row sets)

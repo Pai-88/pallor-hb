@@ -2,15 +2,11 @@
 """Generate the README banner from the dataset itself.
 
 Every vertical stripe is one real photograph, filled with that image's true mean
-conjunctiva colour and positioned by the child's laboratory haemoglobin. Read
-left to right, the banner is the project's entire premise in one picture: pale
-tissue on the left where haemoglobin is low, redder tissue on the right where it
-is high — and enough scatter to show why this is a hard problem rather than an
-obvious one.
+conjunctiva colour and positioned by the child's laboratory haemoglobin. Stripes are ordered by haemoglobin, so lower-Hb images sit on the left and
+higher-Hb images on the right.
 
-Nothing here is decorative. If the colour-pallor relationship were not real the
-banner would look like noise, and if it were trivially strong the whole study
-would be pointless.
+The stripe colours are measured, not stylised, so the figure carries the same
+signal the model sees.
 
 Note on ethics: the banner is built from *derived colour statistics*, never from
 the photographs. No dataset image is redistributed by this repository.
@@ -76,7 +72,7 @@ def build(root: str, out: Path, width_px: int = 2400, height_px: int = 640) -> N
     ax.imshow(field, extent=[0, n, 0.0, FIELD_TOP], aspect="auto",
               interpolation="bilinear", zorder=1)
 
-    # WHO threshold: the boundary the whole project exists to detect.
+    # WHO anaemia cutoff, drawn where the sorted Hb series crosses it.
     cut = int(np.searchsorted(hb, WHO_ANEMIA_HB_THRESHOLD))
     ax.axvline(cut, color=INK, lw=1.0, alpha=0.7, ymin=0.0, ymax=FIELD_TOP, zorder=3)
     ax.text(cut - n * 0.006, FIELD_TOP + 0.035, "anaemic", color=MUTED, fontsize=7.5,
@@ -100,10 +96,9 @@ def build(root: str, out: Path, width_px: int = 2400, height_px: int = 640) -> N
             f"colour, ordered by their real blood test",
             transform=ax.transAxes, color=MUTED, fontsize=8.8, va="center",
             family="sans-serif", zorder=5)
-    # The banner would be dishonest without this line. Sorted by haemoglobin the
-    # field shows no clean pale-to-red gradient (r ~ 0 for mean redness),
-    # and a reader is entitled to know that is the truth rather than assume the
-    # picture failed. The absence of an obvious gradient IS the finding.
+    # Mean redness correlates only weakly with Hb (r ~ 0), so the field shows no
+    # clean pale-to-red gradient. State that on the banner so the flat appearance
+    # is not read as a rendering failure.
     ax.text(0.030, 0.570,
             "No clean fade from pale to red — the signal is real but subtle, "
             "which is exactly why it had to be measured properly",

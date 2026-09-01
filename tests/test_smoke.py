@@ -1,9 +1,7 @@
-"""Adversarial smoke tests: try to break the pipeline, not to confirm it works.
+"""Smoke tests for the pipeline, grouped by failure mode.
 
-Organised by failure mode rather than by module, because the failures that matter
-here are not "this function raised" but "this function returned a plausible number
-that was wrong". Each group encodes a specific way the study's conclusions could
-be silently invalid:
+Grouped by failure mode rather than by module: each group targets one way the
+reported numbers could be wrong without anything raising.
 
 1. Split integrity      — could a test row have been seen during training?
 2. Feature correctness  — do the colour features measure tissue, or an artefact?
@@ -205,7 +203,7 @@ def test_colour_feature_set_excludes_demographics():
 
 
 # =========================================================================== #
-# 3. Numerical robustness — degenerate inputs must raise, not lie
+# 3. Numerical robustness — degenerate inputs must raise ValueError, not return NaN
 # =========================================================================== #
 
 def test_empty_mask_raises_rather_than_returning_nan():
@@ -408,7 +406,7 @@ def test_summarise_repeats_ignores_nans():
 # =========================================================================== #
 
 def test_shuffled_labels_collapse_to_chance():
-    """The single most important guard: a leak would keep AUROC above 0.5."""
+    """Shuffled labels must score at chance; AUROC held above 0.5 indicates leakage."""
     ds = _toy_dataset(n=200, signal=2.0)
     ctrl = ex.permutation_control(ds, features="colour", split="dedup_site", n_repeats=4)
     assert 0.35 < ctrl["mean_auroc"] < 0.65, ctrl
@@ -498,7 +496,7 @@ def test_image_features_beat_demographics_on_real_data():
 
 @requires_cp
 def test_leakage_inflation_is_positive_and_material():
-    """The headline finding: the naive split really is optimistic."""
+    """Naive split on un-deduplicated data must score materially above site-grouped CV."""
     naive = load_cp_anemic(_CP_ROOT, dedup="none", verbose=False)
     strict = load_cp_anemic(_CP_ROOT, dedup="perceptual", verbose=False)
     a = ex._auroc(naive.y, ex.out_of_fold_predictions(

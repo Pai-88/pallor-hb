@@ -122,8 +122,8 @@ def roc_comparison_plot(curves: dict, path: str, cutoff: float) -> None:
 
     `curves` maps a label to a (reference Hb, predicted Hb) pair. Each entry
     brings its own reference array on purpose: the leaky configuration is scored
-    on the un-deduplicated set, and showing the two curves together is what makes
-    the size of the leakage visible rather than asserted.
+    on the un-deduplicated set; plotting both curves on one axis shows the size of
+    the leakage directly.
     """
     import matplotlib
     matplotlib.use("Agg")

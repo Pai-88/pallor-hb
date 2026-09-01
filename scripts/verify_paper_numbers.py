@@ -1,8 +1,7 @@
 """Check every number in the manuscript against results/cp_anemic_summary.json.
 
-The paper argues that unverified numbers propagate through a literature. It would
-be poor form for its own numbers to rest on hand transcription, so this asserts
-them mechanically instead.
+Every claim below is checked against the analysis output rather than transcribed
+by hand, so a re-run that changes a number fails this script.
 
     python3 scripts/verify_paper_numbers.py
 
@@ -88,8 +87,8 @@ DERIVED = [
      lambda d: min(r["auroc"] for r in d["threshold_sweep"]), 6e-4),
     ("re-encode sweep AUROC max", 0.712,
      lambda d: max(r["auroc"] for r in d["threshold_sweep"]), 6e-4),
-    # Derived operating-point arithmetic quoted in Section 4.5. This is exactly the
-    # kind of number that survives a re-analysis unnoticed, so it is asserted here.
+    # Derived operating-point arithmetic quoted in Section 4.5; recomputed here
+    # because it is not stored directly in summary.json.
     ("referrals per 100 at 90% sensitivity", 80,
      lambda d: round(100 * (d["headline"]["prevalence"] * 0.9
                             + (1 - d["headline"]["prevalence"])

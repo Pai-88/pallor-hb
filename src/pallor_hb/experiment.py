@@ -1,22 +1,20 @@
 """Cross-validated experiments on the CP-AnemiC conjunctiva dataset.
 
-The point of this module is not to squeeze out the highest number — it is to
-measure how much of a reported number is real. Three things are varied
-independently and reported side by side:
+This module measures how much of a reported number survives leakage controls.
+Three things are varied independently and reported side by side:
 
 1. **Split strategy.** CP-AnemiC contains 327 redundant rows (710 rows,
    383 distinct photographs), so a random split trains and tests on the same pixels.
-   Comparing `naive_random` against `dedup_site` quantifies that inflation
-   directly rather than asserting it.
+   Comparing `naive_random` against `dedup_site` measures that inflation.
 2. **Feature set.** Age and sex alone predict childhood anemia reasonably well.
    An image model that does not beat `demographics` has not shown that the
    camera contributed anything, so that ablation is run every time.
-3. **Label permutation.** Shuffling the target inside the honest split must
-   collapse AUROC to ~0.5. If it does not, the harness itself leaks.
+3. **Label permutation.** Shuffling the target under `dedup_site` must collapse
+   AUROC to ~0.5; a higher value indicates a leak in the splitting or feature code.
 
 A single gradient-boosted regressor predicts Hb; its continuous output doubles
 as the screening score (lower predicted Hb = more likely anemic), so regression
-agreement and screening discrimination describe one model, not two.
+agreement and screening discrimination are both computed from that one model.
 """
 
 from __future__ import annotations
@@ -115,9 +113,9 @@ def _bootstrap_auroc_ci(
 def _spec_at_sensitivity(y_hb_true: np.ndarray, y_hb_pred: np.ndarray, target: float = 0.90) -> float:
     """Specificity achievable while holding sensitivity at or above `target`.
 
-    Screening tolerates false positives far better than missed anemia, so the
-    honest way to describe a screening model is 'how many well children does it
-    needlessly refer, once it is tuned to catch 90% of anemic ones'.
+    Screening tolerates false positives better than missed anemia, so specificity is
+    reported at a fixed 90% sensitivity: the false-referral rate when the model is
+    tuned to catch 90% of anemic children.
     """
     from sklearn.metrics import roc_curve
 
@@ -259,10 +257,8 @@ def repeated_cv_auroc(
 
     Note that `GroupKFold` is deterministic — it partitions by group size, not at
     random — so under the site-grouped split the *folds* are identical across
-    seeds and only the model's own randomness (subsampling) varies. That is
-    reported honestly rather than dressed up as split variability: it is a
-    measure of model stability, and the site-grouped fold structure is fixed by
-    the data, not chosen.
+    seeds and only the model's own randomness (subsampling) varies. This therefore measures model stability, not split variability; the site-grouped
+    fold structure is determined by group sizes in the data.
     """
     from .stats import summarise_repeats
 
@@ -438,8 +434,7 @@ def model_comparison(
     """Compare the Hb regressor against a direct binary classifier.
 
     Both are legitimate ways to produce a screening score and they answer
-    different questions, so both are reported rather than the better one being
-    quietly adopted:
+    different questions, so both are reported:
 
     - the **regressor** estimates haemoglobin, which is what makes Bland-Altman
       agreement and the "not a haemoglobin meter" conclusion available at all;
@@ -483,9 +478,8 @@ def calibration_comparison(
 ) -> pd.DataFrame:
     """Measure whether post-hoc calibration actually helps on this dataset.
 
-    Included because the textbook answer ("always calibrate a boosted model") is
-    wrong here, and a claim that surprising should ship with the evidence that
-    produced it rather than as an assertion in a docstring.
+    Isotonic calibration does not improve results on this dataset; this function
+    produces the Brier/ECE/AUROC numbers behind that claim.
     """
     from sklearn.metrics import roc_auc_score
 

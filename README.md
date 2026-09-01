@@ -61,7 +61,7 @@ not hidden).
 ```bash
 pip install -r requirements.txt
 # unpack CP-AnemiC into data/cp-anemic/ — see FINDINGS.md
-python3 scripts/run_full_analysis.py     # ~80 s, writes results/ and figures 1–8
+python3 scripts/run_full_analysis.py     # ~9 min first run (alignment pass cached after), writes results/
 python3 -m pytest tests/ -q              # 62 tests incl. adversarial leakage guards
 ```
 

@@ -1,1 +1,32 @@
-Conjunctival pallor photographs are an attractive substrate for non-invasive anaemia screening, and CP-AnemiC — 710 images of Ghanaian children aged 6--59 months with paired laboratory haemoglobin — has become a convenient public benchmark for the task. We report that the benchmark contains duplicate records substantial enough to change published conclusions, and we provide a corrected baseline. Of the 710 metadata rows only 479 are distinct photographs: 212 files are byte-identical copies registered under different image identifiers, and a further 19 are pixel-identical after region-of-interest extraction while differing at the byte level, so content hashing alone does not detect them. Ninety duplicate groups carry \emph{conflicting} haemoglobin labels on identical pixels, one spanning 3.3 to 10.4 \gdl. Evaluating with a random split therefore trains and tests on the same photograph and inflates AUROC by 0.103 (95\,% CI 0.056 to 0.152; bootstrap p<0.001, n_{\text{boot}}=5000). After removing this redundancy and grouping cross-validation by collection site, twelve interpretable colour features reach AUROC 0.780 (95\,% CI 0.737--0.818) for WHO anaemia (\mathrm{Hb}<11 \gdl), against a demographics-only floor of 0.565; the image contributes 0.215 AUROC (DeLong 95\,% CI 0.151 to 0.279, p=4.4\times10^{-11}). Bland--Altman limits of agreement nonetheless span 7.3 g/dL with strong proportional bias (slope -0.67), so the model is a triage screen and not a haemoglobin meter. At a threshold catching 90\,% of anaemic children, specificity falls to 0.362, and decision curve analysis shows the model is worse than referring every child below a threshold probability of about 0.15 — so it earns its place only where confirmatory testing is scarce. We recommend that future work on CP-AnemiC deduplicate at the pixel level and group cross-validation by site, and we release the full analysis so that reported numbers can be checked against these controls.
+Conjunctival pallor photographs are an attractive substrate for non-invasive anaemia
+screening, and CP-AnemiC — 710 images of Ghanaian children aged 6–59 months with paired
+laboratory haemoglobin — has become a convenient public benchmark for the task. We report
+that the benchmark contains duplicate records substantial enough to change published
+conclusions, and we provide a corrected baseline.
+
+Of the 710 metadata rows only 383 are distinct photographs, in three forms that each defeat
+the detection method sufficient for the last. 212 files are byte-identical copies registered
+under different identifiers. A further 19 are re-encoded copies — 13 exactly pixel-identical
+after region-of-interest extraction, 6 near-identical — which differ at the byte level and so
+survive content hashing. The largest and least visible group is 96 shifted or re-cropped
+copies of a photograph saved under a different identifier: their bytes differ and their
+hand-drawn masks differ, so neither hashing nor bounding-box pixel comparison detects them.
+116 groups carry conflicting haemoglobin labels on the same photograph, one spanning
+3.3 to 10.4 g/dL, and 125 groups are attributed to more than one hospital — which defeats
+site-grouped cross-validation as well as random splits. Evaluating with a random split inflates
+AUROC by +0.176 (95% CI +0.120 to +0.232; bootstrap p<0.001,
+n_boot = 5000).
+
+After removing all three forms and grouping cross-validation by collection site, twelve
+interpretable colour features reach AUROC 0.706 (95% CI 0.653–0.757) for WHO
+anaemia (Hb<11 g/dL), against a demographics-only floor of 0.524; the image
+contributes +0.182 AUROC (DeLong 95% CI +0.107 to +0.258,
+p=2.1 x 10^-6). Bland–Altman limits of agreement span 7.8 g/dL with strong
+proportional bias (slope -0.81), so the model is a triage screen and not a haemoglobin
+meter. At a threshold catching 90% of anaemic children, specificity falls to 0.303, and
+decision curve analysis shows the model is worse than referring every child below a threshold
+probability of about 0.26 — so it earns its place only where confirmatory testing is scarce.
+
+We recommend that future work on CP-AnemiC deduplicate under small translations, not merely by
+file hash or by aligned pixel comparison, and group cross-validation by site; we release the
+detector and the full analysis so that reported numbers can be checked against these controls.

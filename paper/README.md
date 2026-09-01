@@ -21,11 +21,12 @@ tectonic main.tex
 ## Before submitting
 
 - [x] **Verify every number against `../results/cp_anemic_summary.json`** — done
-      2026-08-21. All headline values confirmed: AUROC 0.780 [0.737, 0.818];
-      demographics floor 0.565; naive-leaky 0.883; leakage inflation CI
-      [0.056, 0.152]; specificity 0.362 at 90 % sensitivity; leave-one-site-out
-      mean 0.820; permutation null 0.507 ± 0.026; seed stability sd 0.003;
-      Bland–Altman LoA span 7.34 → quoted as 7.3 g/dL.
+      2026-08-21. All headline values confirmed: AUROC 0.706 [0.653, 0.757];
+      demographics floor 0.524; naive-leaky 0.883; leakage inflation CI [0.120, 0.232];
+      specificity 0.303 at 90 % sensitivity; leave-one-site-out mean 0.722; permutation null
+      0.529 ± 0.032; seed stability sd 0.006; Bland–Altman LoA span 7.79 → quoted as 7.8 g/dL.
+      Re-verified 2026-09-01 after the third deduplication pass; `verify_paper_numbers.py`
+      now asserts 53 claims and exits 0.
 - [x] **Corresponding-author email in the title block** — `zcemphh@ucl.ac.uk`.
 - [x] **Acknowledgements resolved** — the empty section was removed
       (commit e196b55); the *Use of generative AI* declaration remains. Add a

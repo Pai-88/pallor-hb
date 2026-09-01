@@ -183,7 +183,7 @@ def leakage_waterfall(rows: list[dict], path: str) -> None:
 def site_forest(loso, path: str, pooled: float | None = None) -> None:
     """Forest plot of leave-one-site-out AUROC, marker area scales with test-set size.
 
-    Sizing by n is what stops a perfect score on eleven patients from reading as
+    Sizing by n is what stops a 0.875 on ten patients from reading as
     the strongest site on the chart.
     """
     plt = _style()

@@ -90,7 +90,7 @@ paths that would break on their build servers).
 
 ```
 arxiv/main.tex      the manuscript
-arxiv/figs/         12 figures
+arxiv/figs/         13 figures
 ```
 
 Do **not** upload `main.pdf` alongside the source; both venues build it themselves from LaTeX.
@@ -109,6 +109,10 @@ out = re.sub(r'\{\.\./results/([^}]+)\}', r'{figs/\1}', src)
 pathlib.Path("arxiv/main.tex").write_text(out)
 print("synced")
 EOF
+
+# figures are NOT copied by the snippet above -- do it explicitly, or the bundle
+# ships stale plots while the .tex is current:
+cp ../results/*.png arxiv/figs/
 ```
 
 Then rebuild and check the declaration survived:
@@ -121,11 +125,13 @@ grep -c 'Use of generative AI' arxiv/main.tex
 
 ## Pre-flight checks — all passing as of 2026-08-22
 
-- [x] Every quoted number verified against `../results/cp_anemic_summary.json` — AUROC 0.780
-      [0.737, 0.818]; demographics floor 0.565; naive-leaky 0.883; leakage inflation CI
-      [0.056, 0.152]; specificity 0.362 at 90 % sensitivity; leave-one-site-out mean 0.820;
-      permutation null 0.507 ± 0.026; seed stability sd 0.003; Bland–Altman LoA span 7.34 → "7.3"
-- [x] 12 `\includegraphics` calls, all resolve; 12 figures present in `arxiv/figs/`
+- [x] Every quoted number verified against `../results/cp_anemic_summary.json` — AUROC 0.706 [0.653, 0.757];
+      demographics floor 0.524; naive-leaky 0.883; leakage inflation CI [0.120, 0.232];
+      specificity 0.303 at 90 % sensitivity; leave-one-site-out mean 0.722; permutation null
+      0.529 ± 0.032; seed stability sd 0.006; Bland–Altman LoA span 7.79 → "7.8".
+      Re-verified 2026-09-01 after the third deduplication pass; `verify_paper_numbers.py`
+      now asserts 53 claims and exits 0.
+- [x] 13 `\includegraphics` calls, all resolve; 13 figures present in `arxiv/figs/`
 - [x] No dangling `\ref`s (21 labels, 10 referenced)
 - [x] 6 citations, 6 bibitems, none unresolved, none uncited
 - [x] Corresponding-author email in the title block

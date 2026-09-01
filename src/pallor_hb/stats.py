@@ -163,7 +163,7 @@ def unpaired_auc_diff_ci(
     """Bootstrap CI for the AUROC difference between two *different* datasets.
 
     Used for the leakage comparison, where one AUROC is measured on 710 rows
-    containing duplicates and the other on 479 distinct images. The samples are
+    containing duplicates and the other on 383 distinct photographs. The samples are
     not paired and not even the same size, so DeLong does not apply; each side is
     resampled independently and the difference accumulated.
     """

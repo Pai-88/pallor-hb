@@ -276,3 +276,84 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def shifted_duplicate_figure(root, out_path):
+    """fig13: a shifted/re-cropped duplicate pair, and their aligned residual.
+
+    The pass-3 finding is hard to believe in the abstract: two files, two masks,
+    two hospitals, two haemoglobin values, one photograph. Showing the pair and
+    the residual after alignment is the most direct evidence available.
+    """
+    import numpy as np
+    from PIL import Image
+    import matplotlib.pyplot as plt
+
+    paths = {p.name: p for p in root.rglob("Image_*.png")}
+    a_name, b_name = "Image_143.png", "Image_165.png"
+
+    def load(name):
+        arr = np.asarray(Image.open(paths[name]).convert("RGBA"), dtype=float)
+        return arr[..., :3], arr[..., 3] >= 128
+
+    A, ma = load(a_name)
+    B, mb = load(b_name)
+
+    # best integer shift over the joint mask (the pass-3 criterion)
+    best = (np.inf, 0, 0)
+    for dy in range(-30, 31):
+        for dx in range(-30, 31):
+            ay0, by0 = max(0, dy), max(0, -dy)
+            ax0, bx0 = max(0, dx), max(0, -dx)
+            h = min(A.shape[0] - ay0, B.shape[0] - by0)
+            w = min(A.shape[1] - ax0, B.shape[1] - bx0)
+            if h < 20 or w < 20:
+                continue
+            mm = ma[ay0:ay0 + h, ax0:ax0 + w] & mb[by0:by0 + h, bx0:bx0 + w]
+            if mm.sum() < 0.6 * min(ma.sum(), mb.sum()):
+                continue
+            d = np.abs(A[ay0:ay0 + h, ax0:ax0 + w][mm] - B[by0:by0 + h, bx0:bx0 + w][mm]).mean()
+            if d < best[0]:
+                best = (d, dy, dx)
+    diff, dy, dx = best
+
+    ay0, by0 = max(0, dy), max(0, -dy)
+    ax0, bx0 = max(0, dx), max(0, -dx)
+    h = min(A.shape[0] - ay0, B.shape[0] - by0)
+    w = min(A.shape[1] - ax0, B.shape[1] - bx0)
+    mm = ma[ay0:ay0 + h, ax0:ax0 + w] & mb[by0:by0 + h, bx0:bx0 + w]
+    resid = np.abs(A[ay0:ay0 + h, ax0:ax0 + w] - B[by0:by0 + h, bx0:bx0 + w]).mean(axis=2)
+    resid[~mm] = np.nan
+    exact = float((resid[mm] == 0).mean())
+
+    def show(ax, rgb, mask, title, sub):
+        img = np.where(mask[..., None], rgb, 255.0).astype("uint8")
+        ax.imshow(img)
+        ax.set_title(title, fontsize=10, pad=3)
+        ax.set_xlabel(sub, fontsize=8.5, color="#5F6A72", labelpad=4)
+        ax.set_xticks([]); ax.set_yticks([])
+        for sp in ax.spines.values():
+            sp.set_color("#C7CDD3")
+
+    fig, axes = plt.subplots(1, 3, figsize=(11.4, 3.0))
+    show(axes[0], A, ma, a_name.replace("_", r"\_") if False else a_name,
+         "Ahmadiyya Muslim Hosp.  ·  Hb 12.5 g/dL")
+    show(axes[1], B, mb, b_name,
+         "Nkawie-Toase Gov. Hosp.  ·  Hb 12.8 g/dL")
+
+    im = axes[2].imshow(resid, cmap="magma", vmin=0, vmax=12)
+    axes[2].set_title(f"residual after {abs(dy)}-px shift", fontsize=10, pad=3)
+    axes[2].set_xlabel(f"mean |difference| = {diff:.2f} of 255  ·  {exact:.0%} of pixels exact",
+                       fontsize=8.5, color="#5F6A72", labelpad=4)
+    axes[2].set_xticks([]); axes[2].set_yticks([])
+    for sp in axes[2].spines.values():
+        sp.set_color("#C7CDD3")
+    cb = fig.colorbar(im, ax=axes[2], fraction=0.035, pad=0.02)
+    cb.ax.tick_params(labelsize=7.5)
+
+    fig.suptitle("One photograph, two identifiers, two hospitals, two haemoglobin values",
+                 fontsize=11.5, y=1.01)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  shifted-duplicate pair: shift {dy},{dx}  mean|diff| {diff:.3f}  exact {exact:.1%}")

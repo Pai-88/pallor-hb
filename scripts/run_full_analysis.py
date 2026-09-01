@@ -33,7 +33,7 @@ import pandas as pd  # noqa: E402
 
 from pallor_hb import plots  # noqa: E402
 from pallor_hb import stats as st  # noqa: E402
-from pallor_hb.dataset import WHO_ANEMIA_HB_THRESHOLD, load_cp_anemic  # noqa: E402
+from pallor_hb.dataset import Dataset, WHO_ANEMIA_HB_THRESHOLD, load_cp_anemic  # noqa: E402
 from pallor_hb.experiment import (  # noqa: E402
     FEATURE_SETS, calibration_comparison, classifier_oof_scores, learning_curve_auroc,
     leave_one_site_out, model_comparison, nested_cv_check, out_of_fold_predictions,
@@ -238,6 +238,36 @@ def main() -> int:
     pd.DataFrame(a_sweep).to_csv(out / "cp_anemic_aligned_threshold_sweep.csv", index=False)
     summary["aligned_threshold_sweep"] = a_sweep
 
+    # ------------------------------------------- matched-n control for pass 3 --
+    # Pass 3 removes 96 rows AND removes leakage. A smaller training set alone
+    # costs AUROC (see the learning curve), so the drop must be decomposed or the
+    # paper would credit sample-size loss to leakage.
+    banner("7b · MATCHED-n CONTROL FOR THE PASS-3 STEP")
+    n_target = len(ds)
+    sub_scores = []
+    for seed in range(5 if args.quick else 25):
+        rng = np.random.default_rng(seed)
+        idx = np.sort(rng.choice(len(ds_thumb.y), size=n_target, replace=False))
+        sub = Dataset(X=ds_thumb.X.iloc[idx].reset_index(drop=True),
+                      y=ds_thumb.y[idx], groups=ds_thumb.groups[idx],
+                      meta=ds_thumb.meta.iloc[idx].reset_index(drop=True))
+        sub_scores.append(_auroc(sub.y, out_of_fold_predictions(
+            sub, FEATURE_SETS[HEADLINE_FEATURES], HEADLINE_SPLIT)))
+    sub_scores = np.array(sub_scores)
+    thumb_auroc = pick("thumbnail_site", HEADLINE_FEATURES).auroc
+    matched = {
+        "n": n_target, "n_repeats": len(sub_scores),
+        "auroc_mean": float(sub_scores.mean()), "auroc_sd": float(sub_scores.std(ddof=1)),
+        "attributable_to_sample_size": float(thumb_auroc - sub_scores.mean()),
+        "attributable_to_leakage": float(sub_scores.mean() - honest.auroc),
+    }
+    print(f"  479 subsampled to {n_target}, leakage kept: {matched['auroc_mean']:.3f} "
+          f"± {matched['auroc_sd']:.3f}")
+    print(f"  of the {thumb_auroc - honest.auroc:.3f} drop: "
+          f"{matched['attributable_to_sample_size']:.3f} sample size, "
+          f"{matched['attributable_to_leakage']:.3f} leakage")
+    summary["matched_n_control"] = matched
+
     # ------------------------------------------------------------- figures --
     banner("8 · FIGURES")
     plots.roc_figure(
@@ -256,7 +286,10 @@ def main() -> int:
         {"label": "+ grouped by hospital", "auroc": pick("dedup_site", "colour").auroc,
          "lo": pick("dedup_site", "colour").auroc_lo,
          "hi": pick("dedup_site", "colour").auroc_hi, "n": len(ds_hash)},
-        {"label": "+ re-encoded copies removed", "auroc": honest.auroc,
+        {"label": "+ re-encoded copies removed", "auroc": pick("thumbnail_site", "colour").auroc,
+         "lo": pick("thumbnail_site", "colour").auroc_lo,
+         "hi": pick("thumbnail_site", "colour").auroc_hi, "n": len(ds_thumb)},
+        {"label": "+ shifted/re-cropped copies removed", "auroc": honest.auroc,
          "lo": honest.auroc_lo, "hi": honest.auroc_hi, "n": honest.n, "headline": True},
     ], str(out / "fig2_leakage.png"))
 

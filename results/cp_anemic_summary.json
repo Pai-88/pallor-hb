@@ -245,6 +245,14 @@
       "auroc": 0.6949133340885918
     }
   ],
+  "matched_n_control": {
+    "n": 383,
+    "n_repeats": 25,
+    "auroc_mean": 0.7440523151294876,
+    "auroc_sd": 0.021378559266472554,
+    "attributable_to_sample_size": 0.03560870181966491,
+    "attributable_to_leakage": 0.03772389177978763
+  },
   "headline": {
     "split": "perceptual_site",
     "features": "colour",
@@ -480,5 +488,5 @@
       "sd": 0.007522956573350782
     }
   ],
-  "runtime_seconds": 510.9
+  "runtime_seconds": 529.3
 }
